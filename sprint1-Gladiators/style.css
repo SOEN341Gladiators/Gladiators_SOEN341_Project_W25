@@ -1,0 +1,92 @@
+/* Apply basic styling to the entire page */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: #f4f4f4;
+}
+
+/* Style the login container */
+.login-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+}
+
+/* Style input fields */
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style the submit button */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: rgb(44, 79, 161); 
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Change button color on hover */
+button:hover {
+    background-color: lightblue;
+}
+
+/* Style error messages */
+.error-message {
+    color: red;
+    font-size: 14px;
+    display: none; /* Hidden by default */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+input, select, button {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    background-color: rgb(44, 79, 161); /* Green color */
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgb(44, 79, 161);
+}
+
+#teamsList {
+    margin-top: 30px;
+}
+
+#teamList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#teamList li {
+    background-color: #e9ecef;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
