@@ -4,7 +4,7 @@ This group project is a web application built for SOEN 341 during the Winter 202
 # About
 This project is a web application built for SOEN 341 during the Winter 2025 term.
 
-The goal is to create a versatile communication platform, dubbed "ChatHaven", in which users may freely send messaages through text channels or direct messaging.
+The goal is to create a versatile communication platform, dubbed "ChatHaven", in which users may freely send messages through text channels or direct messaging.
 
 # Main Features.
 
