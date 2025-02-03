@@ -17,7 +17,7 @@ The goal is to create a versatile communication platform, dubbed "ChatHaven", in
 
 | Name  | Student ID | Role |
 | ------------- | ------------- |--------|
-| Priyesh Patel| Content Cell  | Backend |
+| Priyesh Patel| 40283049  | Backend |
 | Ria Chana  | Content Cell  | Frontend |
 | Paul Nasr| Content Cell  | Backend |
 | Juan Carlos Bastidas| Content Cell  | Frontend |
