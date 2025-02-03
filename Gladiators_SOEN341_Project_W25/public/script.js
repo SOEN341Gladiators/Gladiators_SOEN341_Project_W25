@@ -13,7 +13,19 @@ document.getElementById("registerForm").addEventListener("submit", async functio
         body: JSON.stringify({ username, password, role })
     });
 
+    // ✅ First, parse the response JSON
     const data = await response.json();
+
+    if (response.ok) {
+        alert("✅ User registered successfully!");
+
+        // Clear the form after successful registration
+        document.getElementById("registerForm").reset();
+    } else {
+        // ❌ Display an alert if the user already exists
+        alert(`❌ Registration failed: ${data.error || "Unknown error"}`);
+    }
+
     document.getElementById("register-result").innerText = data.message || data.error;
 });
 
