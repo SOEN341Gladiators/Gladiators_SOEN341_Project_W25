@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <script src="authenticate.js"></script> 
-    <script src="admin.js"></script> 
-    <link rel="stylesheet" href="style.css"> 
+    <script src="authenticate.js"></script>
+    <script src="admin.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="container">
+        <button class="logout-btn" onclick="logout()">Logout</button>
         <h1>Welcome, Admin</h1>
-        <button class="logout-btn" onclick="logout()">Logout</button> 
 
         <!-- Section for creating teams -->
         <div class="section">
@@ -39,8 +41,9 @@
         <!-- Display the list of created teams -->
         <div class="section" id="teamsList">
             <h3>Existing Teams</h3>
-            <ul id="teamList"></ul> 
+            <ul id="teamList"></ul>
         </div>
     </div>
 </body>
+
 </html>

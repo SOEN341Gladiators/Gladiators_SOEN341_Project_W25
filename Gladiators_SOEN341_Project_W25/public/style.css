@@ -3,11 +3,12 @@ body {
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
+    flex-direction: column;
+    /* Stack elements vertically */
     align-items: center;
-    height: 100vh; /* Full viewport height */
+    height: 100vh;
+    /* Full viewport height */
     background-color: #f4f4f4;
-    padding: 20px;
-    flex-direction: column; /* Stack elements vertically */
 }
 
 /* Style the login container */
@@ -16,31 +17,12 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 300px;
+    width: 300px;
     text-align: center;
-}
-
-/* Style the member dashboard container */
-.member-container {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 100%;
-    max-width: 400px; /* Prevents it from stretching too wide */
-}
-
-/* Style headings */
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: rgb(44, 79, 161);
 }
 
 /* Style input fields */
-input, select {
+input {
     width: 90%;
     padding: 10px;
     margin: 10px 0;
@@ -48,11 +30,11 @@ input, select {
     border-radius: 5px;
 }
 
-/* Style buttons */
+/* Style the submit button */
 button {
     width: 100%;
     padding: 10px;
-    background-color: rgb(44, 79, 161); 
+    background-color: rgb(44, 79, 161);
     color: white;
     border: none;
     border-radius: 5px;
@@ -64,34 +46,41 @@ button:hover {
     background-color: lightblue;
 }
 
-/* Adjustments for logout button */
-.logout-btn {
-    background-color: red;
-    width: auto; /* Prevents full width stretching */
-    padding: 10px 20px;
-    font-size: 16px;
-    margin-top: 20px;
-}
-
-.logout-btn:hover {
-    background-color: darkred;
-}
-
-/* Ensure text does not stretch horizontally */
-.member-container h1,
-.member-container button {
-    width: auto;
-    max-width: 100%;
-}
-
 /* Style error messages */
 .error-message {
     color: red;
     font-size: 14px;
-    display: none; /* Hidden by default */
+    display: none;
+    /* Hidden by default */
 }
 
-/* Team List Section */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+input,
+select,
+button {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    background-color: rgb(44, 79, 161);
+    /* Green color */
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgb(44, 79, 161);
+}
+
 #teamsList {
     margin-top: 30px;
 }
