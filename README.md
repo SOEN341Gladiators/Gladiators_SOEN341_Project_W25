@@ -1,13 +1,12 @@
 # SOEN-341-W25
 This group project is a web application built for SOEN 341 during the Winter 2025 term.
 
-# About
-This project is a web application built for SOEN 341 during the Winter 2025 term.
-
 # Logs
 [Time Log](https://docs.google.com/spreadsheets/d/1ZazzHm_Clk-e3fO78MY3z5a5G_XVLMKugk78yzDHBy4/edit?usp=sharing)\
 [Sprint Log](https://docs.google.com/spreadsheets/d/189oUwvBhPGhCEiS49RxFFelCGyTmhTngUfDhRkbiibw/edit?usp=sharing)
 
+# About
+This project is a web application built for SOEN 341 during the Winter 2025 term.\
 The goal is to create a versatile communication platform, dubbed "ChatHaven", in which users may freely send messages through text channels or direct messaging.
 
 # Main Features.
