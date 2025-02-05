@@ -4,16 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ChatHaven - Login & Register</title>
+    <link rel="stylesheet" href="./style.css"> <!-- Link to CSS -->
 </head>
 
 <body>
+    <div class="login-container">
+        <h2>Register</h2>
+        <form id="registerForm" method="post" action="http://localhost:5000/register">
+            <input type="text" id="registerUsername" placeholder="Username" required>
+            <input type="password" id="registerPassword" placeholder="Password" required>
+            <select id="registerRole">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+        <p id="register-result" class="error-message"></p>
+
+    </div>
+
+    <p>Already have an account?</p>
     <div class="container">
         <button id="loginBtn">Login</button>
-        <button id="registerBtn">Register</button>
     </div>
-    <script src="script.js"></script>
+
+    <script src="./script.js"></script> <!-- Link to JavaScript file -->
 </body>
 
 </html>

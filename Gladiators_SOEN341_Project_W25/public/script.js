@@ -2,16 +2,11 @@ const API_URL = "http://localhost:5000";
 
 // Main menu functionality
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("✅ JavaScript Loaded!");
-
     // Handle main menu buttons
     const loginBtn = document.getElementById("loginBtn");
-    const registerBtn = document.getElementById("registerBtn");
 
-    if (loginBtn && registerBtn) {
-        console.log("✅ Main menu buttons found!");
+    if (loginBtn) {
         loginBtn.addEventListener("click", () => window.location.href = "login.html");
-        registerBtn.addEventListener("click", () => window.location.href = "register.html");
     }
 
     // Handle registration form
