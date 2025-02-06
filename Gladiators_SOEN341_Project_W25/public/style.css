@@ -11,6 +11,12 @@ body {
     background-color: #f4f4f4;
 }
 
+.container button {
+    width: 200px;
+    padding: 14px;
+    font-size: 18px;
+}
+
 /* Style the login container */
 .login-container {
     background: white;

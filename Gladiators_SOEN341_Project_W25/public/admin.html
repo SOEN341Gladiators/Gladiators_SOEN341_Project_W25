@@ -3,47 +3,40 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <script src="authenticate.js"></script>
-    <script src="admin.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="container">
-        <button class="logout-btn" onclick="logout()">Logout</button>
-        <h1>Welcome, Admin</h1>
+    <h1>Admin Dashboard</h1>
+    <button onclick="logout()">Logout</button>
 
-        <!-- Section for creating teams -->
-        <div class="section">
-            <h2>Create New Team</h2>
-            <form id="createTeamForm">
-                <input type="text" id="teamName" placeholder="Team Name" required>
-                <button type="submit">Create Team</button>
-            </form>
-        </div>
+    <h2>Create Team</h2>
+    <form id="createTeamForm">
+        <input type="text" id="teamName" placeholder="Team Name" required>
+        <input type="text" id="teamUsers" placeholder="Enter usernames (comma-separated)" required>
+        <button type="submit">Create Team</button>
+    </form>
+    <p id="team-result" style="color: green; font-weight: bold;"></p>
 
-        <!-- Section for assigning users to channels -->
-        <div class="section">
-            <h2>Assign Users to Channels</h2>
-            <form id="assignUserForm">
-                <select id="selectChannel">
-                    <option value="general">General</option>
-                    <option value="projectHelp">Project Help</option>
-                    <option value="social">Social</option>
-                </select>
-                <input type="text" id="username" placeholder="Enter Username" required>
-                <button type="submit">Assign User</button>
-            </form>
-        </div>
+    <h2>Create Channel</h2>
+    <form id="createChannelForm">
+        <input type="text" id="channelName" placeholder="Channel Name" required>
+        <input type="text" id="channelTeam" placeholder="Enter Team Name" required>
+        <input type="text" id="channelUsers" placeholder="Enter usernames (comma-separated)" required>
+        <button type="submit">Create Channel</button>
+    </form>
+    <p id="channel-result" style="color: green; font-weight: bold;"></p>
 
-        <!-- Display the list of created teams -->
-        <div class="section" id="teamsList">
-            <h3>Existing Teams</h3>
-            <ul id="teamList"></ul>
-        </div>
-    </div>
+    <h2>All Teams</h2>
+    <ul id="adminTeamList"></ul>
+
+    <h2>All Channels</h2>
+    <ul id="adminChannelList"></ul>
+
+    <!-- Load JavaScript at the bottom so elements exist before execution -->
+    <script src="authenticate.js"></script>
+    <script src="admin.js"></script>
 </body>
 
 </html>

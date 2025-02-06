@@ -45,7 +45,7 @@ const Team = mongoose.model("Team", teamSchema);
 // Channel Schema
 const channelSchema = new mongoose.Schema({
     name: { type: String, required: true }, // Name of the channel
-    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", required: true}, // The team this channel belongs to
+    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", required: true }, // The team this channel belongs to
     users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs
 });
 
@@ -346,7 +346,7 @@ app.post("/admin/channel", authenticate, isAdmin, async (req, res) => {
         }
 
         // fetching the user ids with the usernames
-        const userDocs = await User.find({username: {$in: users}});
+        const userDocs = await User.find({ username: { $in: users } });
         const userIds = userDocs.map(user => user._id); // Store ObjectIds instead of usernames
 
         console.log(`✅ Creating new channel '${name}' for team '${teamName}'...`);
