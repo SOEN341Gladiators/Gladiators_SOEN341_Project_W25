@@ -25,6 +25,7 @@ The goal is to create a versatile communication platform, dubbed "ChatHaven", in
 | Paul Nasr| 40282491  | Backend |
 | Juan Carlos Bastidas| Content Cell  | Frontend |
 | Malik Mburu| 40235260 | Frontend |
+| Zakaria El fettahi| 40236677 | Frontend |
 
 
 
