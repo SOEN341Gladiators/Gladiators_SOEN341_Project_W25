@@ -11,6 +11,10 @@ body {
     background-color: #f4f4f4;
 }
 
+h1 {
+    color: rgb(44, 79, 161);
+}
+
 .container button {
     width: 200px;
     padding: 14px;
@@ -62,7 +66,7 @@ button:hover {
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #EAEAEA;
     padding: 20px;
 }
 
