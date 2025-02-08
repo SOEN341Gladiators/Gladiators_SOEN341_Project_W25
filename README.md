@@ -1,6 +1,11 @@
 # SOEN-341-W25
 This group project is a web application built for SOEN 341 during the Winter 2025 term.
 
+# Problem statement
+
+Messaging applications come in abundance. They are complex, disorganized, and cluttered; all while they fail to efficiently seperate work and personal life. Nowadays, too few applications manage to successfully tip toe between functionality and simplicity. Our goal here, is to create a web application capable of solving these issues.
+
+
 # Logs
 [Time Log](https://docs.google.com/spreadsheets/d/1ZazzHm_Clk-e3fO78MY3z5a5G_XVLMKugk78yzDHBy4/edit?usp=sharing)\
 [Sprint Log](https://docs.google.com/spreadsheets/d/189oUwvBhPGhCEiS49RxFFelCGyTmhTngUfDhRkbiibw/edit?usp=sharing)
