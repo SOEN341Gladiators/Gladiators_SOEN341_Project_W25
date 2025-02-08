@@ -3,7 +3,7 @@ This group project is a web application built for SOEN 341 during the Winter 202
 
 # Problem statement
 
-Messaging applications come in abundance. They are complex, disorganized, and cluttered; all while they fail to efficiently seperate work and personal life. Nowadays, too few applications manage to successfully tip toe between functionality and simplicity. Our goal here, is to create a web application capable of solving these issues.
+Messaging applications come in abundance. They are complex, disorganized, and cluttered; all while they fail to efficiently separate work and personal life. Nowadays, too few applications manage to successfully tip-toe between functionality and simplicity. Our goal here, is to create a web application capable of solving these issues.
 
 
 # Logs
