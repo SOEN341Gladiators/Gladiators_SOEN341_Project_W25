@@ -17,8 +17,19 @@
 
     <h2>Your Channels</h2>
     <ul id="userChannels"></ul>
+    
+ <!-- button for opening a chat - malik -->
+    <button class="open-chat" onclick="OpenChat()">Chat</button>
 
     <script src="user.js"></script>
+
+ <!-- wasnt sure where to put this also youd need active chats first but i cant test that so im leaving this here as is - malik -->
+    <script>
+        function OpenChat() {
+            window.location.href = "chat_page.html";
+        }
+    </script>
+
 </body>
 
 </html>
