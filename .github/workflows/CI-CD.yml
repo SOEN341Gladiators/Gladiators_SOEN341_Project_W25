@@ -22,12 +22,15 @@ jobs:
           node-version: '18'
 
       - name: Install Dependencies
+        working-directory: Gladiators_SOEN341_Project_W25
         run: npm install
 
       - name: Run Tests
+        working-directory: Gladiators_SOEN341_Project_W25
         run: npm test
 
       - name: Build Project
+        working-directory: Gladiators_SOEN341_Project_W25
         run: npm run build
 
   deploy:
