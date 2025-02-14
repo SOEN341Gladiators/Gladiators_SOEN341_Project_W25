@@ -321,14 +321,14 @@ app.post("/admin/channel", authenticate, isAdmin, async (req, res) => {
 
     const { name, teamName, users } = req.body;
 
-    if (!name || !teamName || !users || users.length === 0) {
+    if (!name || !teamName || !Array.isArray(users) || users.length === 0) {
         console.log("❌ Bad Request: Missing required fields.");
         return res.status(400).json({ error: "Channel name, team, and users are required!" });
     }
 
     try {
-        console.log(`🔎 Checking if team '${teamName}' exists in database...`);
-        const team = await Team.findOne({ name: teamName }).lean();
+        console.log(`🔎 Checking if team '${teamName}' exists in the database...`);
+        const team = await Team.findOne({ name: teamName });
 
         if (!team) {
             console.log(`❌ Team '${teamName}' not found!`);
@@ -345,16 +345,28 @@ app.post("/admin/channel", authenticate, isAdmin, async (req, res) => {
             return res.status(400).json({ error: `Channel '${name}' already exists!` });
         }
 
-        // fetching the user ids with the usernames
+        // 🔎 Fetch user documents based on usernames in the request body
         const userDocs = await User.find({ username: { $in: users } });
-        const userIds = userDocs.map(user => user._id); // Store ObjectIds instead of usernames
 
-        console.log(`✅ Creating new channel '${name}' for team '${teamName}'...`);
+        // Find users who are NOT in the specified team
+        const usersNotInTeam = users.filter(username => {
+            const user = userDocs.find(user => user.username === username);
+            return !user || String(user.team) !== String(team._id); // If user is not found or not in the team
+        });
+
+        if (usersNotInTeam.length > 0) {
+            console.log(`❌ The following users do not belong to the team '${teamName}': ${usersNotInTeam.join(", ")}`);
+            return res.status(400).json({ error: `These users do not belong to team '${teamName}': ${usersNotInTeam.join(", ")}` });
+        }
+
+        // Extract user IDs for valid users
+        const userIds = userDocs.map(user => user._id);
+
+        console.log(`✅ Creating new channel '${name}' for team '${teamName}' with users: ${users.join(", ")}`);
         const channel = new Channel({ name, team: team._id, users: userIds });
         await channel.save();
 
-        console.log(`🔹 Updating users: ${users} to be assigned to channel '${name}'...`);
-
+        console.log(`🔹 Assigning users to channel '${name}'...`);
         await User.updateMany(
             { _id: { $in: userIds } },
             { $push: { channels: channel._id } }
