@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatHaven • My channels</title>
+    <link rel="stylesheet" href="nav_bar.css">
+</head>
+<link rel="icon" type="image/png" href="icon.png">
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">ChatHaven<button id="sidebarToggle" class="sidebar-toggle">⬅️</button>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" 
+                   placeholder="Search channels..." aria-label="Search channels">
+        </form>
+        <!-- Add Channel Section -->
+        <div class="add-channel-section">
+            <div class="add-channel-title">
+                <span class="add-icon">➕</span> Create Channel 🆕
+            </div>
+            <form id="addChannelForm" style="display: none;">
+                <input type="text" id="newChannelName" placeholder="Channel name" required>
+                <button type="submit" class="create-channel-btn">Create</button>
+            </form>
+        </div>
+        <!-- Favorites Section -->
+        <div class="favorites-section">
+            <div class="favorites-title">Favorite channels ⭐</div>
+            <div class="favorites-list" id="favoritesList"></div>
+        </div>
+        <!-- Recent Section -->
+         <div class="recent-section">
+            <div class="recent-title"> Recent channels 🕒</div>
+            <div class="recent-list" id="recentList"></div>
+
+         </div>
+        <div class="channel-list" id="channelList">
+            <div class="no-channels" id="noChannels">No channels found</div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <h1 class="channel-title" id="channelTitle"></h1>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="theme-toggle-icon">🌓</span>
+            <span class="theme-toggle-text">Toggle theme</span>
+        </button>       
+    </div>
+    
+    <script src="nav_bar.js" />
+</body>
+</html>

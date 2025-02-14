@@ -1,0 +1,306 @@
+:root[data-theme="light"] {
+    --primary-color: rgb(44, 79, 161);
+    --secondary-color: #f3f4f6;
+    --text-primary: #1f2937;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --active-color: rgba(173, 216, 230, 0.3);
+    --bg-color: #f0f2f5;
+    --sidebar-color: rgb(44, 79, 161);
+}
+
+:root[data-theme="dark"] {
+    --primary-color: rgb(59, 130, 246);
+    --secondary-color: #1a1a1a;
+    --text-primary: #e5e7eb;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --active-color: rgba(59, 130, 246, 0.2);
+    --bg-color: #1a1a1a;
+    --sidebar-color: #2d2d2d;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    min-height: 100vh;
+    transition: background-color 0.3s ease;
+    overflow: hidden;
+}
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+
+}
+.theme-toggle:active {
+        transform: translateY(1px);
+}   
+
+.theme-toggle-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+[data-theme="dark"] .theme-toggle-icon {
+    transform: rotate(180deg);
+}
+
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: var(--sidebar-color);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: fixed;
+    transition: background-color 0.3s ease;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-logo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.sidebar-toggle {
+    position: fixed;
+    left: 271px; /* Start at the sidebar edge */
+    top: 25px;
+    background: var(--sidebar-color);
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+
+.sidebar.collapsed ~ .sidebar-toggle {
+    left: 10px; /* Move button left when sidebar is hidden */
+}
+
+.sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+.dashboard-container {
+    transition: margin-left 0.3s ease;
+    margin-left: 240px;
+    }   
+
+.dashboard-container.expanded {
+    margin-left: 0;
+}
+
+
+.search-form {
+    margin-bottom: 16px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+
+.channel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.channel-button {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: transparent;
+    color: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    text-align: left;
+    width: 100%;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.channel-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.channel-button.active {
+    background-color: var(--active-color);
+    color: white;
+    font-weight: 600;
+}
+
+.dashboard-container {
+    flex: 1;
+    margin-left: 240px;
+    padding: 32px;
+}
+
+.channel-title {
+    color: var(--primary-color);
+    margin: 0 0 24px 0;
+    font-size: 1.8rem;
+}
+
+.no-channels {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    padding: 16px;
+    display: none;
+}
+
+.no-channels.show {
+    display: block;
+}
+
+/*favorites and recents section */
+.favorites-section, .recent-section {
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+}
+
+.favorites-title, .recent-title {
+    color: white;
+    font-weight: 600;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+}
+
+.favorites-title:hover, .recent-title:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.favorites-list, .recent-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.arrow {
+    display: inline-block;
+    width: 20px;
+    transition: transform 0.3s ease;
+}
+
+.favorites-list .channel-button,.recent-list .channel-button {
+    padding: 8px 16px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-container {
+    flex: 1;
+    margin-left: 240px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Add Channel Section */
+.add-channel-section {
+    margin-bottom: 16px;
+    margin-top: 20px;  /* Adds space above the section */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 12px;
+}
+
+/* Add Channel Title */
+.add-channel-title {
+    color: white;
+    font-weight: 600;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    user-select: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Hover effect for the title */
+.add-channel-title:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Add icon inside the title */
+.add-channel-title .add-icon {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+/* Create Channel Button */
+.create-channel-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for the button */
+.create-channel-btn:hover {
+    background-color: #5b6eae;
+}
