@@ -1,4 +1,13 @@
 //wasnt sure if i should have created a new js file for this - malik
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("message-input");
+    input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Prevent default form submission
+            sendMessage();
+        }
+    });
+});
 
 function sendMessage() {
     const input = document.getElementById("message-input");
