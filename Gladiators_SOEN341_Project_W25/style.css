@@ -1,0 +1,290 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+*{
+    margin: o;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+  
+ 
+
+/* Apply basic styling to the entire page */
+body {
+    /*font-family: Arial, sans-serif ;*/
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    /* Stack elements vertically */
+    align-items: center;
+    height: 100vh;
+
+   background: linear-gradient(135deg, rgb(30, 30, 30), rgb(60, 60, 60)); 
+
+
+}
+
+.container button {
+    width: 200px;
+    padding: 14px;
+    font-size: 18px;
+}
+
+
+/* Style the login container */
+.login-container {
+    background: linear-gradient(135deg, rgb(30, 30, 30), rgb(60, 60, 60)); 
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+    color: #fff;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+
+/* Style input fields */
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style the submit button */
+button {
+    
+    width: 100%;
+    padding: 10px;
+    background-color: #5563DE;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+
+}
+
+/* Change button color on hover */
+button:hover {
+    background-color: lightblue;
+}
+
+/* Style error messages */
+.error-message {
+    color: red;
+    font-size: 14px;
+    display: none;
+    /* Hidden by default */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+input,
+select,
+button {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #5563DE;
+    /* Green color */
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgb(44, 79, 161);
+}
+
+#teamsList {
+    margin-top: 30px;
+}
+
+#teamList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#teamList li {
+    background-color: #e9ecef;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/*new*/
+
+/* NEW: Top Bar Styles */
+.top-bar {
+    width: 100%;
+    background-color: #5563DE;  /* Matches your primary theme color */
+    padding: 10px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    text-align: center;
+    color: white;
+    z-index: 100;
+}
+
+.top-bar h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+/* NEW: Bottom Bar Styles */
+.bottom-bar {
+    width: 100%;
+    background-color:#5563DE;  /* Light footer background */
+    padding: 8px 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+}
+
+.bottom-bar a {
+    color: #ffff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.bottom-bar a:hover {
+    text-decoration: underline;
+}
+
+/* NEW: Adjust body padding to account for fixed top and bottom bars */
+body {
+    padding-top: 80px;    /* Space for top bar */
+    padding-bottom: 40px; /* Space for bottom bar */
+}
+
+.account-text {
+    color: #fff;
+}
+
+/* NEW for the members page, i didnt wanna merge it i was scared */
+
+/* --- Top Bar Styles --- */
+.top-bar {
+  width: 100%;
+  background-color: #5563DE;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  z-index: 100;
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Logout button in top bar */
+.logout-btn {
+    background-color: #e74c3c;  /* Red background */
+  border: none;               /* No border */
+  color: #fff;                /* White text */
+  font-size: bold, 16px;            /* Small text size */
+  width: 60px;                /* Fixed width for a small square */
+  height: 40px;               /* Fixed height for a small square */
+  border-top-left-radius: 10%;  
+    border-top-right-radius: 10%;
+    border-bottom-right-radius: 10%;
+    border-bottom-left-radius: 10%;
+  display: flex;              /* Center content horizontally and vertically */
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  
+  }
+  
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Dashboard Container --- */
+.dashboard-container {
+  width: 90%;
+  max-width: 800px;
+  margin: 100px auto 60px; /* Top margin to account for the top bar, bottom margin for the bottom bar */
+  padding: 20px;
+  background: linear-gradient(135deg, rgb(240, 234, 214), rgb(225, 218, 203));
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Section Styles --- */
+.dashboard-container section {
+  margin-bottom: 30px;
+  padding: 10px;
+}
+
+.dashboard-container h2 {
+  border-bottom: 2px solid #5563DE;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* --- Lists Styling --- */
+#userTeams,
+#userChannels {
+  list-style: none;
+  padding: 0;
+}
+
+#userTeams li,
+#userChannels li {
+  background-color: #f4f4f4;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/* --- Chat Button --- */
+.open-chat {
+  background-color: #5563DE;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.open-chat:hover {
+  background-color: rgb(44, 79, 161);
+}
+
+/* --- Adjust Body Padding for Fixed Bars --- */
+body {
+  padding-top: 80px;    /* Space for top bar */
+  padding-bottom: 40px; /* Space for bottom bar */
+}
+
