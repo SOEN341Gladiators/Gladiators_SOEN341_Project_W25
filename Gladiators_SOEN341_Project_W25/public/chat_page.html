@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+    <link rel="stylesheet" href="./style_ChatPage.css"> <!-- Link to CSS -->
+</head>
+<body>
+    <button onclick="closeChat()" style="position: absolute; top: 20px; right: 20px;">Close Chat</button>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="messaging.js"></script> <!-- Link to JavaScript file -->
+</body>
+</html>
+
+<!-- unauthenticated file -->

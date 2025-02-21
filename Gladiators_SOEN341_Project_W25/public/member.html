@@ -2,23 +2,48 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Member Dashboard</title>
-    <script src="authenticate.js"></script> <!-- Authentication -->
-    <link rel="stylesheet" href="./style.css">
+  <meta charset="UTF-8">
+  <title>Member Dashboard</title>
+  <script src="authenticate.js"></script> <!-- Authentication -->
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
+  <!-- NEW: Top Bar -->
+  <header class="top-bar">
+    <h1>ChatHaven Dashboard</h1>
     <button class="logout-btn" onclick="logout()">Logout</button>
-    <h1>Welcome, Member</h1>
+  </header>
 
-    <h2>Your Teams</h2>
-    <ul id="userTeams"></ul>
+  <!-- NEW: Dashboard Container wraps the main content -->
 
-    <h2>Your Channels</h2>
-    <ul id="userChannels"></ul>
+  <div class="dashboard-container">
+    <section class="welcome-section">
+      <h2>Welcome, Member</h2>
+    </section>
 
-    <script src="user.js"></script>
+    <section class="teams-section">
+      <h2>Your Teams</h2>
+      <ul id="userTeams"></ul>
+    </section>
+
+    <section class="channels-section">
+      <h2>Your Channels</h2>
+      <ul id="userChannels"></ul>
+    </section>
+
+    <section class="chat-section">
+      <button class="open-chat" onclick="OpenChat()">Chat</button>
+    </section>
+  </div>
+
+<!-- the chat is in nav_bar.html so idk how you guys wanna implement that -->
+  <script src="user.js"></script>
+  <script>
+    function OpenChat() {
+      window.location.href = "chat_page.html";  
+    }
+  </script>
 </body>
 
 </html>
