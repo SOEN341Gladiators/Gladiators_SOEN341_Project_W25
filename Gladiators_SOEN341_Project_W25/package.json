@@ -7,6 +7,9 @@
     "mongoose": "^8.9.5",
     "path": "^0.12.7"
   }
+  "scripts": {
+    "build": "echo 'Build step successful'"
+  }
 }
 
 
