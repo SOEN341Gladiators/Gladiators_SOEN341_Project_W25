@@ -8,3 +8,8 @@
     "path": "^0.12.7"
   }
 }
+
+"scripts": {
+  "start": "node server.js",
+  "test": "echo \"No tests specified\" && exit 0"
+}
