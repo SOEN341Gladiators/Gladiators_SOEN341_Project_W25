@@ -2,6 +2,7 @@ const channelList = document.getElementById('channelList');
 const noChannels = document.getElementById('noChannels');
 let channels = []; // Start with no channels
 
+
 // Theme toggle
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = themeToggle.querySelector('.theme-toggle-icon');
@@ -369,44 +370,118 @@ addFriendForm.addEventListener('submit', (e) => {
     }
 });
 
-// Chat functionality
-const chatForm = document.getElementById('chatForm');
-const chatInput = document.getElementById('chatInput');
-const chatMessages = document.getElementById('chatMessages');
+// new chat related function with delete option
 
-chatForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const messageText = chatInput.value.trim();
-  if (messageText && selectedChat) {
-      const now = new Date();
-      const timestamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+let messageId = 0; // to generate unique message id
 
-      const message = {
-          text: messageText,
-          timestamp: timestamp
-      };
-
-      // Initialize chat history for the selected chat if it doesn't exist
-      if (!chatHistory[selectedChat]) {
-          chatHistory[selectedChat] = [];
-      }
-
-      // Add the message to the chat history
-      chatHistory[selectedChat].push(message);
-
-      const messageElem = document.createElement('div');
-      messageElem.className = 'chat-message';
-
-      messageElem.innerHTML = `
-        <span class="chat-message-text">${message.text}</span>
-        <span class="chat-message-time">${message.timestamp}</span>
-      `;
-
-      chatMessages.appendChild(messageElem);
-      chatInput.value = '';
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
+document.addEventListener('click', (e) => {
+    const dropdowns = document.querySelectorAll('.Dropdown-menu');
+    dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(e.target) && !e.target.matches('.message-actions')) {
+            dropdown.classList.remove('show');
+        }
+    });
 });
+
+function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const messageText = chatInput.value.trim();
+    
+    if (messageText === '') return;
+
+    const chatMessages = document.getElementById('chatMessages');
+    
+    // Add timestamp
+    const now = new Date();
+    const timestamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    // Create message container
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+    messageDiv.id = `message-${messageId}`;
+
+    // Create message content with timestamp
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    content.innerHTML = `
+        <div class="message-text">${messageText}</div>
+        <div class="message-timestamp">${timestamp}</div>
+    `;
+
+    // Create actions dropdown
+    const actions = document.createElement('div');
+    actions.className = 'message-actions';
+    actions.textContent = '⋮';
+    
+    // Create dropdown menu
+    const dropdown = document.createElement('div');
+    dropdown.className = 'Dropdown-menu';
+    
+    const deleteOption = document.createElement('div');
+    deleteOption.className = 'delete-option';
+    deleteOption.textContent = 'Delete message';
+    // Fix the delete click handler
+    deleteOption.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentId = messageDiv.id.split('-')[1];
+        deleteMessage(currentId);
+        dropdown.classList.remove('show');
+    });
+    
+    dropdown.appendChild(deleteOption);
+    
+    // Modify actions click listener
+    actions.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Hide all other dropdowns first
+        document.querySelectorAll('.Dropdown-menu').forEach(menu => {
+            if (menu !== dropdown) {
+                menu.classList.remove('show');
+            }
+        });
+        dropdown.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+        dropdown.classList.remove('show');
+    });
+
+    // Assemble elements
+    messageDiv.appendChild(content);
+    messageDiv.appendChild(actions);
+    messageDiv.appendChild(dropdown);
+    chatMessages.appendChild(messageDiv);
+
+    // Scroll to bottom and clear input
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    chatInput.value = '';
+    messageId++;
+}
+
+function deleteMessage(id) {
+    const messageDiv = document.getElementById(`message-${id}`);
+    if (messageDiv) {
+        const content = messageDiv.querySelector('div:first-child');
+        content.textContent = '🚫 Message deleted by moderator';
+        content.classList.add('deleted');
+        
+        // Remove the action buttons
+        const actions = messageDiv.querySelector('.message-actions');
+        const dropdown = messageDiv.querySelector('.Dropdown-menu');
+        if (actions) actions.remove();
+        if (dropdown) dropdown.remove();
+    }
+}
+
+// Allow Enter key to send messages
+document.getElementById('chatInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+//end of changes made related to delete message
 
 function closeChat() {
     // Show the welcome messages and hide the chat area

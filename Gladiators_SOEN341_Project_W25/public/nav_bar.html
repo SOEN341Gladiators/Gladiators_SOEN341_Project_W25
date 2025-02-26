@@ -72,9 +72,9 @@
             <div class="chat-messages" id="chatMessages">
                 <!-- Chat messages will appear here -->
             </div>
-            <form id="chatForm" class="chat-form">
+            <form id="chatForm" class="chat-form" onsubmit="event.preventDefault();">
                 <input type="text" id="chatInput" placeholder="Type your message here..." autocomplete="off">
-                <button type="submit">Send</button>
+                <button type="button" onclick="sendMessage()">Send</button>
             </form>
         </div>
     </div>

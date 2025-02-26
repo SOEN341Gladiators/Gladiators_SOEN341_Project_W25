@@ -5,8 +5,48 @@ const jwt = require("jsonwebtoken"); // For creating tokens
 const cors = require("cors"); // To allow API calls from other domains
 const path = require("path");
 
+// delete message related to socket.io
+const http = require('http');
+const server = http.createServer(app);
+const io = new Server(server);
+const { Server } = require('socket.io');
+
+let messages = [];
+let messageId = 0;
+
+app.use(express.static('public'));
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    
+    // Send existing messages to new client
+    socket.emit('all_messages', messages);
+
+    socket.on('send_message', (text) => {
+        const newMessage = {
+            id: messageId++,
+            text: text,
+            isDeleted: false
+        };
+        messages.push(newMessage);
+        io.emit('new_message', newMessage);
+    });
+
+    socket.on('delete_message', (id) => {
+        messages = messages.map(msg => {
+            if (msg.id === id) return { ...msg, isDeleted: true };
+            return msg;
+        });
+        io.emit('message_deleted', id);
+    });
+});
+
+server.listen(3000, () => {
+    console.log('listening on *:3000');
+});
+// end of delete message related changes
+
 // Initialize Express App
-const app = express();
 
 app.use(express.json()); // This allows Express to parse JSON
 app.use(cors()); // Allow requests from other origins

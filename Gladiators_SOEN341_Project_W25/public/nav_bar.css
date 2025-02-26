@@ -566,6 +566,71 @@ width: 85%; /* Adjust as needed: Increased width when sidebar is collapsed*/
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+/*delete related*/
+
+.message-actions {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+
+.Dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 20px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 1;
+}
+
+.Dropdown-menu.show {
+  display: block;
+}
+
+.delete-option {
+  padding: 8px 15px;
+  cursor: pointer;
+  color: #ff4444;
+}
+
+.delete-option:hover {
+  background-color: #f8f8f8;
+}
+
+#chatInput {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.deleted-message {
+  color: #888;
+  font-style: italic;
+}
+
+/* end of styles added */
+
 @keyframes slideIn {
   from {
       transform: translateX(100%);
@@ -622,5 +687,115 @@ left: 50%;
 
 .sidebar.collapsed ~ .dashboard-container .start-conversation-text {
 left: 50%;
+}
+
+/* Update message styling */
+.message {
+  margin-bottom: 8px;
+  padding: 12px 40px 12px 16px; /* Increased right padding for actions */
+  background: var(--chat-message-bg);
+  color: var(--chat-message-text-color);
+  border-radius: 8px;
+  max-width: 80%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  word-break: break-word;
+}
+
+/* Update message actions styling */
+.message-actions {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: var(--chat-message-text-color);
+  opacity: 0.8;
+}
+
+.message-actions:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Update dropdown menu styling */
+.Dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--chat-bg-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.Dropdown-menu.show {
+  display: block;
+}
+
+.delete-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #ff4444;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.delete-option:hover {
+  background-color: #ff4444;
+  color: white;
+}
+
+/* Style for deleted messages */
+.deleted-message {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--chat-message-text-color);
+  font-style: italic;
+  opacity: 0.9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.message div:first-child.deleted {
+  color: var(--chat-message-text-color);
+  opacity: 0.8;
+  font-style: italic;
+  background: rgba(255, 0, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 3px solid rgba(255, 0, 0, 0.5);
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.message-text {
+    color: var(--chat-message-text-color);
+    word-wrap: break-word;
+}
+
+.message-timestamp {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+    align-self: flex-end;
+    margin-top: 2px;
+}
+
+.deleted .message-timestamp {
+    opacity: 0.6;
 }
 
