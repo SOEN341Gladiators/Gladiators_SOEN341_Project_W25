@@ -1,20 +1,126 @@
+// server.js changes
 const express = require("express");
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs"); // For hashing passwords
-const jwt = require("jsonwebtoken"); // For creating tokens
-const cors = require("cors"); // To allow API calls from other domains
+const http = require("http");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
 const path = require("path");
 
-// Initialize Express App
 const app = express();
+const server = http.createServer(app);
 
-app.use(express.json()); // This allows Express to parse JSON
-app.use(cors()); // Allow requests from other origins
-app.use(express.static(path.join(__dirname, "public"))); // Allowing backend to serve static files in frontend
+// Socket.IO integration - FIXED: Move socket.io setup before routes
+const io = require("socket.io")(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+
+
+// server.js additions - Add this after your existing Socket.IO setup
+const messageSchema = new mongoose.Schema({
+    channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', required: true },
+    username: { type: String, required: true },
+    message: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+
+const Message = mongoose.model('Message', messageSchema);
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    // Handle joining a channel
+    socket.on('join channel', async (channelId) => {
+        try {
+            // Leave previous channel if any
+            if (socket.currentChannel) {
+                socket.leave(socket.currentChannel);
+            }
+
+            // Join new channel
+            socket.join(channelId);
+            socket.currentChannel = channelId;
+
+            // Fetch last 50 messages for this channel
+            const messages = await Message.find({ channelId })
+                .sort({ timestamp: -1 })
+                .limit(50)
+                .lean();
+
+            // Send message history to the user
+            socket.emit('message history', messages.reverse());
+        } catch (error) {
+            console.error('Error joining channel:', error);
+            socket.emit('error', 'Failed to join channel');
+        }
+    });
+
+    // Handle new messages
+    socket.on('message', async (data) => {
+        try {
+            const { channelId, username, message } = data;
+
+            // Log incoming message data
+            console.log('Received message:', data);
+
+            // Save message to database
+            const newMessage = new Message({
+                channelId,
+                username,
+                message,
+                timestamp: new Date()
+            });
+            await newMessage.save();
+
+            // Broadcast message to all users in the channel
+            io.to(channelId).emit('message', {
+                username,
+                message,
+                timestamp: newMessage.timestamp
+            });
+
+            // Log successful broadcast
+            console.log('Message broadcast to channel:', channelId);
+        } catch (error) {
+            console.error('Error handling message:', error);
+            socket.emit('error', 'Failed to send message');
+        }
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        if (socket.currentChannel) {
+            socket.leave(socket.currentChannel);
+        }
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+// Add this route to fetch message history
+app.get('/messages/:channelId', authenticate, async (req, res) => {
+    try {
+        const messages = await Message.find({ channelId: req.params.channelId })
+            .sort({ timestamp: -1 })
+            .limit(50)
+            .lean();
+        res.json(messages.reverse());
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+});
+
+// Configure middleware
+app.use(express.static("public"));
+app.use(express.json());
+app.use(cors());
 
 // Connect to MongoDB
 mongoose
-    .connect("mongodb+srv://pnasr:150Hockey%3F@gladiators-db.g80yx.mongodb.net/?retryWrites=true&w=majority&appName=gladiators-db", {
+    .connect("mongodb://localhost:27017/chatApp", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
@@ -135,75 +241,47 @@ app.get("/admin/teams", authenticate, isAdmin, async (req, res) => {
 });
 
 // Get the teams for a user
+// Get teams for the logged-in user
 app.get("/user/teams", authenticate, async (req, res) => {
     try {
-        console.log("🔹 Fetching teams from database...");
-        // ✅ Fetch the user's teams (users can be part of multiple teams)
-        const user = await User.findById(req.user.id).select("team").lean();
+        // Find the user and populate the teams they belong to
+        const user = await User.findById(req.user.id).populate("team", "name").lean();
 
-        if (!user) {
-            console.log(`❌ No user found with ID: ${req.user.id}`);
-            return res.status(404).json({ error: "User not found!" });
+        if (!user || !user.team) {
+            return res.status(404).json({ error: "No teams found for this user." });
         }
 
-        if (!user.team) {
-            console.log(`❌ User '${req.user.username}' is not assigned to any team.`);
-            return res.status(400).json({ error: "User is not assigned to any team!" });
-        }
-
-        console.log(`✅ User '${req.user.username}' belongs to team ID: ${user.team}`);
-
-        // ✅ Find the team(s) that the user belongs to
-        const teams = await Team.find({ _id: user.team }, "name").lean();
-
-        if (!teams || teams.length === 0) {
-            console.log("⚠️ No teams found for user!");
-            return res.status(404).json({ error: "No teams available for this user." });
-        }
-
-        console.log("✅ Teams retrieved:", teams);
-        res.json(teams);
+        res.json([user.team]); // Return the team(s) the user belongs to
     } catch (error) {
         console.error("❌ Error fetching teams:", error);
         res.status(500).json({ error: "Failed to fetch teams!" });
     }
 });
 
+
 // 1. Get Channels for a Team
 app.get("/channels", authenticate, async (req, res) => {
-    console.log("🔹 Fetching channels from database...");
-
     try {
-        // ✅ Check if req.user is defined
-        if (!req.user || !req.user.id) {
-            console.log("❌ req.user is undefined or missing 'id'");
-            return res.status(401).json({ error: "Unauthorized: No user data in request!" });
-        }
-
-        console.log(`🔎 Fetching user with ID: ${req.user.id}`);
-
-        // ✅ Fetch the logged-in user's team
         const user = await User.findById(req.user.id).populate("team").lean();
 
         if (!user) {
-            console.log(`❌ No user found with ID: ${req.user.id}`);
             return res.status(404).json({ error: "User not found!" });
         }
 
         if (!user.team) {
-            console.log(`❌ User '${user.username}' does not belong to any team.`);
             return res.status(400).json({ error: "User is not assigned to any team!" });
         }
 
-        console.log(`✅ User '${user.username}' belongs to team: ${user.team.name} (ID: ${user.team._id})`);
+        const channels = await Channel.find({ team: user.team._id }).populate("team").lean();
 
-        // ✅ Find channels that belong to this team
-        const channels = await Channel.find({ team: user.team }).populate("team").lean();
+        if (!channels || channels.length === 0) {
+            return res.json([]); // Return empty array instead of error
+        }
 
-        console.log(`✅ Found ${channels.length} channels for team '${user.team.name}: '${channels[0].name}'.`);
         res.json(channels);
     } catch (err) {
-        res.status(400).json({ error: "Failed to fetch channels!" });
+        console.error("Error fetching channels:", err);
+        res.status(500).json({ error: "Failed to fetch channels!" });
     }
 });
 
@@ -374,6 +452,7 @@ app.use((req, res) => {
 });
 
 // Start the Server
-app.listen(5000, () => {
-    console.log("Server is running on http://localhost:5000");
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
 });

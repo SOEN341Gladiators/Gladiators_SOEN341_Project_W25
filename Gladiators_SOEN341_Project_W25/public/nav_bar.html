@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>ChatHeaven • My channels</title>
     <link rel="stylesheet" href="nav_bar.css">
     <link rel="icon" type="image/png" href="icon.png">
 </head>
+
 <body>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-logo">
             <span>ChatHaven</span>
         </div>
         <form class="search-form">
-            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..." aria-label="Search channels">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
         </form>
         <!-- Add Channel Section -->
         <div class="add-channel-section">
@@ -24,6 +27,14 @@
                 <button type="submit" class="create-channel-btn">Create</button>
             </form>
         </div>
+        <!-- nav_bar.html -->
+
+        <!-- My Teams Section -->
+        <div class="teams-section">
+            <div class="teams-title">My Teams 🏠</div>
+            <div class="teams-list" id="teamList"></div>
+        </div>
+
         <!-- Add Friend Section -->
         <div class="add-friend-section">
             <div class="add-friend-title">
@@ -78,6 +89,9 @@
             </form>
         </div>
     </div>
-    <script src="nav_bar.js"></script>
+
+    <!-- At the end of the body tag -->
+    <script src="nav_bar.js" defer async></script>
 </body>
+
 </html>
