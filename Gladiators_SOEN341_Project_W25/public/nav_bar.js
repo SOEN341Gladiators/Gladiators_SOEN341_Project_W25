@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const startConversationText = document.getElementById('startConversationText');
     const addChannelForm = document.getElementById('addChannelForm');
     const addChannelTitle = document.querySelector('.add-channel-title');
+    const dmTitle = document.querySelector('.dm-title');
+    const dmDropdown = document.getElementById('dmDropdown');
 
     // Theme toggle functionality
     const themeToggle = document.getElementById('themeToggle');
@@ -29,10 +31,51 @@ document.addEventListener('DOMContentLoaded', function () {
         sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '➡️' : '⬅️';
     });
 
+    // Fetch users to populate DM List
+    async function loadUsers() {
+        try {
+          const response = await fetch('/users'); // Adjust the endpoint as needed
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const users = await response.json();
+          populateUserList(users);
+        } catch (error) {
+          console.error('Error fetching users:', error);
+        }
+    }
+
+    // Function to populate the DM dropdown list with users
+    function populateUserList(users) {
+        const dmDropdownList = document.getElementById('dmDropdownList');
+        dmDropdownList.innerHTML = ''; // Clear existing items
+        const currentUser = localStorage.getItem('username');
+    
+        users.forEach(user => {
+            // Skip the current user so you don't join a DM with yourself
+            if (user.username === currentUser) return;
+
+            const li = document.createElement('li');
+            li.className = 'dm-item';
+            li.textContent = user.username || user.name || 'Unknown User';
+        
+            // When a user is clicked, open a DM with that user
+            li.addEventListener('click', () => {
+                joinDM(user.username);
+                // Optionally, hide the dropdown after a selection is made
+                document.getElementById('dmDropdown').style.display = 'none';
+                document.getElementById('chatTitle').textContent = user.username;
+            });
+        
+            dmDropdownList.appendChild(li);
+        });
+    }
+
     // Channel management functions
     async function fetchChannels() {
         try {
             const token = localStorage.getItem('token');
+            console.log('Token:', token);
             if (!token) {
                 throw new Error('No authentication token found');
             }
@@ -50,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const channels = await response.json();
             displayChannels(channels);
         } catch (error) {
-            console.error('Error fetching channels:', error);
+            console.log('Error fetching channels:', error);
             noChannels.style.display = 'block';
             noChannels.textContent = 'Error loading channels';
         }
@@ -107,6 +150,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add channel form toggle
     addChannelTitle.addEventListener('click', () => {
         addChannelForm.style.display = addChannelForm.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Add channel form toggle
+    dmTitle.addEventListener('click', () => {
+        if (dmDropdown.style.display === 'none' || dmDropdown.style.display === '') {
+            dmDropdown.style.display = 'block';
+            loadUsers(); // Refresh the list when opening
+        } else {
+            dmDropdown.style.display = 'none';
+        }
     });
 
     // Add channel form submission

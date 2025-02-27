@@ -29,29 +29,33 @@
                 <button type="submit" class="create-channel-btn">Create</button>
             </form>
         </div>
-        <div class="add-friend-section">
-            <div class="add-friend-title">
-                <span class="add-icon">➕</span> Add friend 🫂
+
+        <div class="dm-section">
+            <div class="dm-title">
+                <span class="add-icon">⮟</span> Direct Message 💬
             </div>
-            <form id="addFriendForm" style="display: none;">
-                <input type="text" id="newFriendName" placeholder="Friend name" required>
-                <button type="submit" class="add-friend-btn">Add</button>
-            </form>
-        </div>
+            <div class="dm-dropdown" id="dmDropdown" style="display: none;">
+                <ul class="dm-dropdown-list" id="dmDropdownList">
+                    <!-- Dynamically Populated -->
+                </ul>
+            </div>
+        </div>        
+
         <div class="favorites-section">
             <div class="favorites-title">Favorite channels ⭐</div>
             <div class="favorites-list" id="favoritesList"></div>
         </div>
+
         <div class="recent-section">
             <div class="recent-title">Recent channels 🕒</div>
             <div class="recent-list" id="recentList"></div>
         </div>
-        <div class="channel-list" id="channelList">
-            <div class="no-channels" id="noChannels">No channels found</div>
-        </div>
+
         <div class="dropdown-menu">
-            <div class="dropdown-title">Available ❇️</div>
-            <div class="dropdown-list" id="usersList"></div>
+            <div class="dropdown-title">All Channels ❇️</div>
+            <div class="channel-list" id="channelList">
+                <div class="no-channels" id="noChannels">No channels found</div>
+            </div>
         </div>
     </div>
 

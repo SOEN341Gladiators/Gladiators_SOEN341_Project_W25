@@ -124,7 +124,7 @@ body {
 
 /* Sidebar Styles */
 .sidebar {
-  width: 230px;
+  width: 270px;
   height: 100vh;
   background: #5563DE;
   padding: 20px;
@@ -400,21 +400,22 @@ body {
 }
 
 /* Add Friend Section */
-.add-friend-section {
-  margin-bottom: 16px;
+.dm-section {
+  position: relative; /* Container for absolute positioning */
   margin-top: 20px;
+  margin-bottom: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 12px;
 }
 
-.add-friend-title {
-  color: white;
+.dm-title {
+  color: #fff;
   font-weight: 600;
   padding: 8px 16px;
   margin-bottom: 8px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -423,28 +424,67 @@ body {
   transition: background 0.3s ease;
 }
 
-.add-friend-title:hover {
+.dm-title:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.add-friend-title .add-icon {
+.dm-title .add-icon {
   font-size: 1.2rem;
-  color: #fff;
+  color: #9C27B0;
 }
 
-.add-friend-btn {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
+/* Dropdown container styling */
+.dm-dropdown {
+  position: absolute;
+  top: calc(100% + 4px); /* slight gap below the title */
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  max-height: 200px; /* limit to approx. 5 items */
+  overflow-y: auto; /* enable vertical scrolling if content exceeds max-height */
+}
+
+.dm-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dm-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px; /* Rounds the track corners */
+}
+
+.dm-dropdown::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 8px; /* Rounds the thumb corners */
+}
+
+.dm-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Remove default list styles and add padding */
+.dm-dropdown-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.dm-item {
+  padding: 10px 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background 0.2s ease;
 }
 
-.add-friend-btn:hover {
-  background-color: #5b6eae;
+.dm-item:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+
+.dm-item:hover {
+  background-color: #f9f9f9;
 }
 
 /* NEW: Styles for the available users dropdown */
