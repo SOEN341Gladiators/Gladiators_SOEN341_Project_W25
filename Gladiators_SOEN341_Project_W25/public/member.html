@@ -2,48 +2,92 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Member Dashboard</title>
-  <script src="authenticate.js"></script> <!-- Authentication -->
-  <link rel="stylesheet" href="./style.css">
+    <meta charset="UTF-8">
+    <title>Member Dashboard</title>
+    <script src="authenticate.js"></script> <!-- Authentication -->
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./nav_bar.css">
+    <script src="/socket.io/socket.io.js"></script> <!-- Include Socket.IO client library -->
 </head>
 
 <body>
-  <!-- NEW: Top Bar -->
-  <header class="top-bar">
-    <h1>ChatHaven Dashboard</h1>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </header>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span>ChatHaven</span>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
+        </form>
+        <div class="dm-section">
+            <div class="dm-title">
+                <span class="add-icon">⮟</span> Direct Message 💬
+            </div>
+            <div class="dm-dropdown" id="dmDropdown" style="display: none;">
+                <ul class="dm-dropdown-list" id="dmDropdownList">
+                    <!-- Dynamically Populated -->
+                </ul>
+            </div>
+        </div>
+        <div class="favorites-section">
+            <div class="favorites-title">Favorite channels ⭐</div>
+            <div class="favorites-list" id="favoritesList"></div>
+        </div>
+        <div class="recent-section">
+            <div class="recent-title">Recent channels 🕒</div>
+            <div class="recent-list" id="recentList"></div>
+        </div>
+        <div class="dropdown-menu">
+            <div class="dropdown-title">All Channels ❇️</div>
+            <div class="channel-list" id="channelList">
+                <div class="no-channels" id="noChannels">No channels found</div>
+            </div>
+        </div>
+    </div>
 
-  <!-- NEW: Dashboard Container wraps the main content -->
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <h1>ChatHaven Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
 
-  <div class="dashboard-container">
-    <section class="welcome-section">
-      <h2>Welcome, Member</h2>
-    </section>
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <section class="welcome-section">
+            <h2>Welcome, Member</h2>
+        </section>
 
-    <section class="teams-section">
-      <h2>Your Teams</h2>
-      <ul id="userTeams"></ul>
-    </section>
+        <section class="teams-section">
+            <h2>Your Teams</h2>
+            <ul id="userTeams"></ul>
+        </section>
 
-    <section class="channels-section">
-      <h2>Your Channels</h2>
-      <ul id="userChannels"></ul>
-    </section>
+        <section class="channels-section">
+            <h2>Your Channels</h2>
+            <ul id="userChannels"></ul>
+        </section>
 
-    <section class="chat-section">
-      <button class="open-chat" onclick="OpenChat()">Chat</button>
-    </section>
-  </div>
+        <section class="chat-section">
+            <button class="open-chat" id="openChatButton">Chat</button>
+        </section>
+    </div>
 
-<!-- the chat is in nav_bar.html so idk how you guys wanna implement that -->
-  <script src="user.js"></script>
-  <script>
-    function OpenChat() {
-      window.location.href = "chat_page.html";  
-    }
-  </script>
+    <!-- Scripts -->
+    <!-- The in-line script to trigger button functionalities-->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const openChatButton = document.getElementById("openChatButton");
+
+            openChatButton.addEventListener("click", function () {
+                window.location.href = "chat_page.html";
+            });
+        });
+    </script>
+    <script src="messaging.js"></script>
+    <script src="user.js"></script>
+
+
 </body>
 
 </html>
