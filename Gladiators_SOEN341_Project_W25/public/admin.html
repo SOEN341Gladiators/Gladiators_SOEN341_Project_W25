@@ -5,34 +5,78 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nav_bar.css">
+    <link rel="stylesheet" href="style_ChatPage.css">
+    <script src="/socket.io/socket.io.js"></script> <!-- Include Socket.IO client library -->
 </head>
 
 <body>
-    <h1>Admin Dashboard</h1>
-    <button onclick="logout()">Logout</button>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span>ChatHaven</span>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
+        </form>
+        <div class="dm-section">
+            <div class="dm-title">
+                <span class="add-icon">⮟</span> Direct Message 💬
+            </div>
+            <div class="dm-dropdown" id="dmDropdown" style="display: none;">
+                <ul class="dm-dropdown-list" id="dmDropdownList">
+                    <!-- Dynamically Populated -->
+                </ul>
+            </div>
+        </div>
+        <div class="favorites-section">
+            <div class="favorites-title">Favorite channels ⭐</div>
+            <div class="favorites-list" id="favoritesList"></div>
+        </div>
+        <div class="recent-section">
+            <div class="recent-title">Recent channels 🕒</div>
+            <div class="recent-list" id="recentList"></div>
+        </div>
+        <div class="dropdown-menu">
+            <div class="dropdown-title">All Channels ❇️</div>
+            <div class="channel-list" id="channelList">
+                <div class="no-channels" id="noChannels">No channels found</div>
+            </div>
+        </div>
+    </div>
 
-    <h2>Create Team</h2>
-    <form id="createTeamForm">
-        <input type="text" id="teamName" placeholder="Team Name" required>
-        <input type="text" id="teamUsers" placeholder="Enter usernames (comma-separated)" required>
-        <button type="submit">Create Team</button>
-    </form>
-    <p id="team-result" style="color: green; font-weight: bold;"></p>
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <h1>Admin Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
 
-    <h2>Create Channel</h2>
-    <form id="createChannelForm">
-        <input type="text" id="channelName" placeholder="Channel Name" required>
-        <input type="text" id="channelTeam" placeholder="Enter Team Name" required>
-        <input type="text" id="channelUsers" placeholder="Enter usernames (comma-separated)" required>
-        <button type="submit">Create Channel</button>
-    </form>
-    <p id="channel-result" style="color: green; font-weight: bold;"></p>
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <h2>Create Team</h2>
+        <form id="createTeamForm">
+            <input type="text" id="teamName" placeholder="Team Name" required>
+            <input type="text" id="teamUsers" placeholder="Enter usernames (comma-separated)" required>
+            <button type="submit">Create Team</button>
+        </form>
+        <p id="team-result" style="color: green; font-weight: bold;"></p>
 
-    <h2>All Teams</h2>
-    <ul id="adminTeamList"></ul>
+        <h2>Create Channel</h2>
+        <form id="createChannelForm">
+            <input type="text" id="channelName" placeholder="Channel Name" required>
+            <input type="text" id="channelTeam" placeholder="Enter Team Name" required>
+            <input type="text" id="channelUsers" placeholder="Enter usernames (comma-separated)" required>
+            <button type="submit">Create Channel</button>
+        </form>
+        <p id="channel-result" style="color: green; font-weight: bold;"></p>
 
-    <h2>All Channels</h2>
-    <ul id="adminChannelList"></ul>
+        <h2>All Teams</h2>
+        <ul id="adminTeamList"></ul>
+
+        <h2>All Channels</h2>
+        <ul id="adminChannelList"></ul>
+    </div>
 
     <!-- Load JavaScript at the bottom so elements exist before execution -->
     <script src="authenticate.js"></script>
