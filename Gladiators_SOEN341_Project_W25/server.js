@@ -25,7 +25,7 @@ app.use(cors());
 
 // Connect to MongoDB
 mongoose
-    .connect("mongodb://localhost:27017/chatApp", {
+    .connect("mongodb+srv://pnasr:150Hockey%3F@gladiators-db.g80yx.mongodb.net/?retryWrites=true&w=majority&appName=gladiators-db", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
