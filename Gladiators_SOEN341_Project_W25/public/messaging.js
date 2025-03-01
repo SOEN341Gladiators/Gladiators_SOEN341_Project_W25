@@ -4,6 +4,10 @@ let currentChannel = null;
 let username = localStorage.getItem('username') || 'Anonymous';
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Ensure username is set properly at initialization
+    username = localStorage.getItem('username') || 'Anonymous';
+    console.log("Current username:", username);
+
     // Initialize Socket.IO connection
     socket = io("http://localhost:5000", {
         reconnection: true,
@@ -15,6 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const chatForm = document.getElementById("chatForm");
     const messageInput = document.getElementById("chatInput");
     const chatMessages = document.getElementById("chatMessages");
+    const chatArea = document.getElementById("chatArea");
+    const welcomeText = document.getElementById("welcomeText");
+    const startConversationText = document.getElementById("startConversationText");
+
+    // Check for channel selected from admin page
+    const selectedChannelId = localStorage.getItem('selectedChannelId');
+    const selectedChannelName = localStorage.getItem('selectedChannelName');
 
     // Debug log socket connection status
     console.log("Socket.IO initialization started");
@@ -23,6 +34,26 @@ document.addEventListener("DOMContentLoaded", function () {
     socket.on("connect", () => {
         console.log("Connected to chat server. Socket ID:", socket.id);
         displaySystemMessage("Connected to chat server");
+
+        // If there's a channel selected from admin page, join it immediately
+        if (selectedChannelId && chatArea) {
+            console.log("Auto-joining channel from admin page:", selectedChannelId);
+            joinChannel(selectedChannelId);
+
+            // Update UI
+            chatArea.style.display = 'flex';
+            if (welcomeText) welcomeText.style.display = 'none';
+            if (startConversationText) startConversationText.style.display = 'none';
+
+            // Update chat title
+            if (document.getElementById('chatTitle')) {
+                document.getElementById('chatTitle').textContent = selectedChannelName;
+            }
+
+            // Clear the localStorage items so we don't auto-join next time
+            localStorage.removeItem('selectedChannelId');
+            localStorage.removeItem('selectedChannelName');
+        }
     });
 
     socket.on("disconnect", () => {
@@ -49,6 +80,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Send message functionality
     function sendMessage(e) {
         e.preventDefault(); // Prevent form submission
+
+        // Always refresh username from localStorage before sending
+        username = localStorage.getItem('username') || 'Anonymous';
 
         if (!messageInput || !currentChannel) {
             console.log("Cannot send message - missing input or channel", {
@@ -101,7 +135,10 @@ function displayMessage(data) {
     const messageDiv = document.createElement("div");
     messageDiv.className = "message";
 
-    if (data.username === username) {
+    // Get current username again to ensure it's up to date
+    const currentUsername = localStorage.getItem('username') || 'Anonymous';
+
+    if (data.username === currentUsername) {
         messageDiv.classList.add("own-message");
     }
 
@@ -151,6 +188,44 @@ function joinChannel(channelId) {
     displaySystemMessage(`Joined channel ${channelId}`);
 }
 
+// Helper function to generate a unique DM channel ID
+function generateDMChannelId(userA, userB) {
+    // Sort the usernames to ensure consistency (e.g., "Alice_Bob")
+    return [userA, userB].sort().join('_');
+}
+
+// Standalone function to join a direct message channel
+async function joinDM(recipientUsername) {
+    if (!recipientUsername) {
+        console.error("Recipient username is required to join DM");
+        return;
+    }
+    try {
+        const token = localStorage.getItem("token");
+        // Call the DM endpoint to get a valid DM channel ObjectId
+        const response = await fetch(`http://localhost:5000/dm-channel?recipient=${recipientUsername}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) {
+            throw new Error("Failed to get DM channel");
+        }
+        const data = await response.json();
+        const dmChannelId = data.channelId;
+        if (currentChannel === dmChannelId) {
+            console.log("Already in DM channel:", dmChannelId);
+            return;
+        }
+        console.log("Joining DM channel:", dmChannelId);
+        currentChannel = dmChannelId;
+        socket.emit("join channel", dmChannelId);
+        displaySystemMessage(`Joined DM with ${recipientUsername}`);
+    } catch (error) {
+        console.error("Error joining DM:", error);
+    }
+}
+
 // Function to close the chat
 function closeChat() {
     const chatArea = document.getElementById("chatArea");
@@ -175,5 +250,6 @@ function closeChat() {
 
 // Export functions for use in other files
 window.joinChannel = joinChannel;
+window.joinDM = joinDM;
 window.displaySystemMessage = displaySystemMessage;
 window.closeChat = closeChat;

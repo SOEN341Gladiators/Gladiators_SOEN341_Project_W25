@@ -45,6 +45,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 createTeamForm.reset();
                 document.getElementById("team-result").innerText = data.message;
                 loadTeams();
+
+                // Refresh the channel list in the sidebar
+                if (typeof window.fetchChannels === 'function') {
+                    window.fetchChannels();
+                }
             } else {
                 alert(`❌ Error: ${data.error}`);
             }
@@ -91,6 +96,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 createChannelForm.reset();
                 document.getElementById("channel-result").innerText = data.message;
                 loadChannels();
+
+                // Refresh the channel list in the sidebar
+                if (typeof window.fetchChannels === 'function') {
+                    window.fetchChannels();
+                }
             } else {
                 alert(`❌ Error: ${data.error}`);
             }
@@ -123,11 +133,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const teamList = document.getElementById("adminTeamList");
             teamList.innerHTML = teams.map(team => `<li>${team.name}</li>`).join("");
+
+            // Also populate the team dropdown for channel creation
+            const channelTeam = document.getElementById("channelTeam");
+            if (channelTeam) {
+                channelTeam.innerHTML = "";
+                teams.forEach(team => {
+                    const option = document.createElement("option");
+                    option.value = team.name;
+                    option.textContent = team.name;
+                    channelTeam.appendChild(option);
+                });
+            }
         } catch (error) {
             console.error("❌ Error loading teams:", error);
         }
     }
-
 
     // Load Channels
     async function loadChannels() {
@@ -144,18 +165,31 @@ document.addEventListener("DOMContentLoaded", function () {
             const channels = await response.json();
 
             if (!Array.isArray(channels)) {
-                console.error("❌ Server did not return an array:", teams);
+                console.error("❌ Server did not return an array:", channels);
                 throw new Error("Invalid response format from server.");
             }
 
             console.log("✅ Channels received:", channels);
 
             const channelList = document.getElementById("adminChannelList");
-            channelList.innerHTML = channels.map(channel => `<li>${channel.name} (Team: ${channel.team.name})</li>`).join("");
+            channelList.innerHTML = channels.map(channel => {
+                const teamName = channel.team ? channel.team.name : 'No team';
+                return `<li>${channel.name} (Team: ${teamName})</li>`;
+            }).join("");
         } catch (error) {
             console.error("❌ Error loading channels:", error);
         }
     }
+
+    // Define a function for nav_bar.js to use when a channel is clicked
+    window.handleAdminChannelClick = function (channelId, channelName) {
+        // Store the channel info in localStorage for the chat page to use
+        localStorage.setItem('selectedChannelId', channelId);
+        localStorage.setItem('selectedChannelName', channelName);
+
+        // Redirect to the chat page instead of showing the chat on admin page
+        window.location.href = 'chat_page.html';
+    };
 
     // Load data on page load
     loadTeams();

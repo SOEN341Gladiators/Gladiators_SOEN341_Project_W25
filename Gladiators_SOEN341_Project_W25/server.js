@@ -18,8 +18,54 @@ const io = require("socket.io")(server, {
     }
 });
 
+// Configure middleware
+app.use(express.static("public"));
+app.use(express.json());
+app.use(cors());
 
-// server.js additions - Add this after your existing Socket.IO setup
+// Connect to MongoDB
+mongoose
+    .connect("mongodb://localhost:27017/chatApp", {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log("Connected to MongoDB!"))
+    .catch((err) => console.log("MongoDB connection error:", err));
+
+// MongoDB Schemas and Models
+
+// User Schema
+const userSchema = new mongoose.Schema({
+    username: { type: String, required: true, unique: true }, // Each user must have a unique username
+    password: { type: String, required: true }, // Store the hashed password
+    role: { type: String, default: "user" }, // "admin" or "user"
+    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null }, // The team assigned to the user
+});
+
+const User = mongoose.model("User", userSchema);
+
+// Team Schema
+const teamSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true }, // Team name (must be unique)
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Store admin who created the team
+    createdAt: { type: Date, default: Date.now } // Timestamp
+});
+
+const Team = mongoose.model("Team", teamSchema);
+
+// Channel Schema
+const channelSchema = new mongoose.Schema({
+    name: { type: String, required: true }, // Name of the channel or DM
+    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", required: function () { return this.type === "channel"; } },
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // For team channels, this can include multiple users; for DMs, only 2 users
+    type: { type: String, enum: ["channel", "dm"], default: "channel" }, // "channel" for team channels, "dm" for direct messages
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // Store admin who created the channel
+});
+
+const Channel = mongoose.model("Channel", channelSchema);
+
+// Message Schema
 const messageSchema = new mongoose.Schema({
     channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', required: true },
     username: { type: String, required: true },
@@ -100,63 +146,6 @@ io.on('connection', (socket) => {
     });
 });
 
-// Add this route to fetch message history
-app.get('/messages/:channelId', authenticate, async (req, res) => {
-    try {
-        const messages = await Message.find({ channelId: req.params.channelId })
-            .sort({ timestamp: -1 })
-            .limit(50)
-            .lean();
-        res.json(messages.reverse());
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch messages' });
-    }
-});
-
-// Configure middleware
-app.use(express.static("public"));
-app.use(express.json());
-app.use(cors());
-
-// Connect to MongoDB
-mongoose
-    .connect("mongodb://localhost:27017/chatApp", {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(() => console.log("Connected to MongoDB!"))
-    .catch((err) => console.log("MongoDB connection error:", err));
-
-// MongoDB Schemas and Models
-
-// User Schema
-const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true }, // Each user must have a unique username
-    password: { type: String, required: true }, // Store the hashed password
-    role: { type: String, default: "user" }, // "admin" or "user"
-    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null }, // The team assigned to the user
-});
-
-const User = mongoose.model("User", userSchema);
-
-// Team Schema
-const teamSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true }, // Team name (must be unique)
-    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs
-    createdAt: { type: Date, default: Date.now } // Timestamp
-});
-
-const Team = mongoose.model("Team", teamSchema);
-
-// Channel Schema
-const channelSchema = new mongoose.Schema({
-    name: { type: String, required: true }, // Name of the channel
-    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", required: true }, // The team this channel belongs to
-    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Array of user IDs
-});
-
-const Channel = mongoose.model("Channel", channelSchema);
-
 // Helper Functions
 
 // Generate a simple JWT token for user authentication
@@ -204,32 +193,34 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// Get all users
+app.get('/users', authenticate, async (req, res) => {
+    try {
+        // Fetch all users except the current user
+        const users = await User.find({ _id: { $ne: req.user.id } }, 'username').lean();
+        res.json(users);
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        res.status(500).json({ error: 'Failed to retrieve users' });
+    }
+});
 
 // Get the teams for an admin
 app.get("/admin/teams", authenticate, isAdmin, async (req, res) => {
     try {
         console.log("🔹 Fetching teams from database...");
-        // ✅ Fetch the user's teams (users can be part of multiple teams)
-        const user = await User.findById(req.user.id).select("team").lean();
 
-        if (!user) {
-            console.log(`❌ No user found with ID: ${req.user.id}`);
-            return res.status(404).json({ error: "User not found!" });
-        }
-
-        if (!user.team) {
-            console.log(`❌ User '${req.user.username}' is not assigned to any team.`);
-            return res.status(400).json({ error: "User is not assigned to any team!" });
-        }
-
-        console.log(`✅ User '${req.user.username}' belongs to team ID: ${user.team}`);
-
-        // ✅ Find the team(s) that the user belongs to
-        const teams = await Team.find({ _id: user.team }, "name").lean();
+        // For admins, get teams they've created or are part of
+        const teams = await Team.find({
+            $or: [
+                { createdBy: req.user.id },
+                { users: req.user.id }
+            ]
+        }, "name").lean();
 
         if (!teams || teams.length === 0) {
-            console.log("⚠️ No teams found for user!");
-            return res.status(404).json({ error: "No teams available for this user." });
+            console.log("⚠️ No teams found for admin!");
+            return res.json([]); // Return empty array instead of error
         }
 
         console.log("✅ Teams retrieved:", teams);
@@ -240,7 +231,24 @@ app.get("/admin/teams", authenticate, isAdmin, async (req, res) => {
     }
 });
 
-// Get the teams for a user
+// Get admin-created channels
+app.get("/admin/channels", authenticate, isAdmin, async (req, res) => {
+    try {
+        // Get channels created by this admin
+        const channels = await Channel.find({
+            createdBy: req.user.id,
+            type: "channel"
+        })
+            .populate("team", "name")
+            .lean();
+
+        res.json(channels);
+    } catch (error) {
+        console.error("Error fetching admin channels:", error);
+        res.status(500).json({ error: "Failed to fetch channels" });
+    }
+});
+
 // Get teams for the logged-in user
 app.get("/user/teams", authenticate, async (req, res) => {
     try {
@@ -258,34 +266,53 @@ app.get("/user/teams", authenticate, async (req, res) => {
     }
 });
 
-
-// 1. Get Channels for a Team
+// Get Channels for a Team
 app.get("/channels", authenticate, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).populate("team").lean();
+        const user = await User.findById(req.user.id).lean();
 
         if (!user) {
             return res.status(404).json({ error: "User not found!" });
         }
 
-        if (!user.team) {
-            return res.status(400).json({ error: "User is not assigned to any team!" });
+        let channels = [];
+
+        // If user is admin, get the channels they created
+        if (user.role === "admin") {
+            const adminChannels = await Channel.find({
+                createdBy: user._id,
+                type: "channel"
+            }).populate("team", "name").lean();
+
+            channels = adminChannels;
+        }
+        // For regular users, get channels for their team
+        else if (user.team) {
+            const teamChannels = await Channel.find({
+                team: user.team,
+                type: "channel"
+            }).populate("team", "name").lean();
+
+            channels = teamChannels;
         }
 
-        const channels = await Channel.find({ team: user.team._id }).populate("team").lean();
+        // For all users, get their DM channels
+        const dmChannels = await Channel.find({
+            users: user._id,
+            type: "dm"
+        }).lean();
 
-        if (!channels || channels.length === 0) {
-            return res.json([]); // Return empty array instead of error
-        }
+        // Combine both types of channels
+        const allChannels = [...channels, ...dmChannels];
 
-        res.json(channels);
+        res.json(allChannels);
     } catch (err) {
         console.error("Error fetching channels:", err);
         res.status(500).json({ error: "Failed to fetch channels!" });
     }
 });
 
-// 2. Get User Details by Username (No Authentication Required)
+// Get User Details by Username
 app.get("/user/:username", async (req, res) => {
     const { username } = req.params;
 
@@ -310,6 +337,60 @@ app.get("/user/channels", authenticate, async (req, res) => {
     }
 });
 
+// Get the dm channel of 2 users
+app.get("/dm-channel", authenticate, async (req, res) => {
+    const recipient = req.query.recipient;
+    const currentUser = req.user.username;
+
+    if (!recipient) {
+        return res.status(400).json({ error: "Recipient is required" });
+    }
+
+    try {
+        // Generate a consistent DM channel name by alphabetically sorting the two usernames
+        const dmName = [currentUser, recipient].sort().join('_');
+
+        // Look for an existing DM channel with this name and type "dm"
+        let dmChannel = await Channel.findOne({ name: dmName, type: "dm" });
+
+        if (!dmChannel) {
+            // Retrieve user documents for both users
+            const currentUserDoc = await User.findOne({ username: currentUser });
+            const recipientDoc = await User.findOne({ username: recipient });
+
+            if (!currentUserDoc || !recipientDoc) {
+                return res.status(404).json({ error: "One or both users not found" });
+            }
+
+            // Create a new DM channel that includes only these two users
+            dmChannel = new Channel({
+                name: dmName,
+                type: "dm",
+                users: [currentUserDoc._id, recipientDoc._id]
+            });
+
+            await dmChannel.save();
+        }
+
+        res.json({ channelId: dmChannel._id });
+    } catch (error) {
+        console.error("Error getting DM channel:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// Add this route to fetch message history
+app.get('/messages/:channelId', authenticate, async (req, res) => {
+    try {
+        const messages = await Message.find({ channelId: req.params.channelId })
+            .sort({ timestamp: -1 })
+            .limit(50)
+            .lean();
+        res.json(messages.reverse());
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+});
 
 //******************************POST Methods************************************//
 
@@ -347,7 +428,12 @@ app.post("/login", async (req, res) => {
     if (!isPasswordValid) return res.status(400).json({ error: "Incorrect password!" });
 
     const token = generateToken(user); // Generate a token
-    res.json({ message: "Login successful!", token, role: user.role });
+    res.json({
+        message: "Login successful!",
+        token,
+        role: user.role,
+        username: user.username // Include username in the response
+    });
 });
 
 // Admin: Create a Team and Assign Users
@@ -376,8 +462,12 @@ app.post("/admin/team", authenticate, isAdmin, async (req, res) => {
         // Extract user ObjectIds
         const userIds = userDocs.map(user => user._id);
 
-        // Create the team
-        const team = new Team({ name: teamName, users: userIds });
+        // Create the team with admin as creator
+        const team = new Team({
+            name: teamName,
+            users: userIds,
+            createdBy: req.user.id
+        });
         await team.save();
 
         // Assign team ID to each user
@@ -416,27 +506,31 @@ app.post("/admin/channel", authenticate, isAdmin, async (req, res) => {
         console.log(`✅ Team '${teamName}' found! Proceeding with channel creation.`);
 
         console.log(`🔎 Checking if channel '${name}' already exists...`);
-        const existingChannel = await Channel.findOne({ name }).lean();
+        const existingChannel = await Channel.findOne({ name, team: team._id }).lean();
 
         if (existingChannel) {
-            console.log(`❌ Channel '${name}' already exists!`);
-            return res.status(400).json({ error: `Channel '${name}' already exists!` });
+            console.log(`❌ Channel '${name}' already exists in this team!`);
+            return res.status(400).json({ error: `Channel '${name}' already exists in this team!` });
         }
 
         // fetching the user ids with the usernames
         const userDocs = await User.find({ username: { $in: users } });
         const userIds = userDocs.map(user => user._id); // Store ObjectIds instead of usernames
 
+        // Include the admin in the users array if not already included
+        if (!userIds.some(id => id.toString() === req.user.id)) {
+            userIds.push(req.user.id);
+        }
+
         console.log(`✅ Creating new channel '${name}' for team '${teamName}'...`);
-        const channel = new Channel({ name, team: team._id, users: userIds });
+        const channel = new Channel({
+            name,
+            team: team._id,
+            users: userIds,
+            type: "channel",
+            createdBy: req.user.id
+        });
         await channel.save();
-
-        console.log(`🔹 Updating users: ${users} to be assigned to channel '${name}'...`);
-
-        await User.updateMany(
-            { _id: { $in: userIds } },
-            { $push: { channels: channel._id } }
-        );
 
         console.log(`✅ Channel '${name}' created successfully!`);
         res.status(201).json({ message: `✅ Channel '${name}' created successfully!` });
