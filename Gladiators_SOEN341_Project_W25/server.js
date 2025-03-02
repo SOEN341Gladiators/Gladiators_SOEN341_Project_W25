@@ -1,4 +1,4 @@
-// server.js changes
+// server.js with admin-only delete functionality
 const express = require("express");
 const mongoose = require("mongoose");
 const http = require("http");
@@ -70,14 +70,29 @@ const messageSchema = new mongoose.Schema({
     channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', required: true },
     username: { type: String, required: true },
     message: { type: String, required: true },
-    timestamp: { type: Date, default: Date.now }
+    timestamp: { type: Date, default: Date.now },
+    isDeleted: { type: Boolean, default: false } // Add isDeleted field for message deletion
 });
 
 const Message = mongoose.model('Message', messageSchema);
 
+// Store connected users and their roles
+const connectedUsers = new Map();
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
+
+    // Store user information when they connect
+    socket.on('user info', (data) => {
+        if (data.username && data.role) {
+            connectedUsers.set(socket.id, {
+                username: data.username,
+                role: data.role
+            });
+            console.log(`User ${data.username} with role ${data.role} registered`);
+        }
+    });
 
     // Handle joining a channel
     socket.on('join channel', async (channelId) => {
@@ -118,15 +133,18 @@ io.on('connection', (socket) => {
                 channelId,
                 username,
                 message,
-                timestamp: new Date()
+                timestamp: new Date(),
+                isDeleted: false // Initialize as not deleted
             });
             await newMessage.save();
 
             // Broadcast message to all users in the channel
             io.to(channelId).emit('message', {
+                _id: newMessage._id,
                 username,
                 message,
-                timestamp: newMessage.timestamp
+                timestamp: newMessage.timestamp,
+                isDeleted: false
             });
 
             // Log successful broadcast
@@ -137,8 +155,46 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Handle message deletion (admin only)
+    socket.on('delete message', async (messageId) => {
+        try {
+            // Check if user is admin
+            const userInfo = connectedUsers.get(socket.id);
+            if (!userInfo || userInfo.role !== 'admin') {
+                socket.emit('error', 'Permission denied: Only admins can delete messages');
+                return;
+            }
+
+            // Update the message in the database
+            const updatedMessage = await Message.findByIdAndUpdate(
+                messageId,
+                { isDeleted: true },
+                { new: true }
+            );
+
+            if (!updatedMessage) {
+                socket.emit('error', 'Message not found');
+                return;
+            }
+
+            // Broadcast the deletion to all users in the channel
+            io.to(updatedMessage.channelId.toString()).emit('message deleted', {
+                messageId: updatedMessage._id,
+                channelId: updatedMessage.channelId
+            });
+
+            console.log('Message deletion broadcast:', messageId);
+        } catch (error) {
+            console.error('Error deleting message:', error);
+            socket.emit('error', 'Failed to delete message');
+        }
+    });
+
     // Handle disconnection
     socket.on('disconnect', () => {
+        // Remove user from connected users
+        connectedUsers.delete(socket.id);
+
         if (socket.currentChannel) {
             socket.leave(socket.currentChannel);
         }

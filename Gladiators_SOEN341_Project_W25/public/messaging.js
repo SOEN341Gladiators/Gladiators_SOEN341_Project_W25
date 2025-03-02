@@ -2,11 +2,14 @@
 let socket;
 let currentChannel = null;
 let username = localStorage.getItem('username') || 'Anonymous';
+let userRole = localStorage.getItem('userRole') || 'user';
 
 document.addEventListener("DOMContentLoaded", function () {
     // Ensure username is set properly at initialization
     username = localStorage.getItem('username') || 'Anonymous';
+    userRole = localStorage.getItem('userRole') || 'user';
     console.log("Current username:", username);
+    console.log("Current user role:", userRole);
 
     // Initialize Socket.IO connection
     socket = io("http://localhost:5000", {
@@ -72,6 +75,11 @@ document.addEventListener("DOMContentLoaded", function () {
         messages.forEach(msg => displayMessage(msg));
     });
 
+    socket.on("message deleted", (data) => {
+        console.log("Message deleted:", data);
+        updateDeletedMessage(data.messageId);
+    });
+
     socket.on("error", (error) => {
         console.error("Socket error:", error);
         displaySystemMessage("Error: " + error);
@@ -79,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Send message functionality
     function sendMessage(e) {
-        e.preventDefault(); // Prevent form submission
+        if (e) e.preventDefault(); // Prevent form submission if event is provided
 
         // Always refresh username from localStorage before sending
         username = localStorage.getItem('username') || 'Anonymous';
@@ -120,6 +128,16 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Close dropdowns when clicking outside of them
+    document.addEventListener('click', (e) => {
+        const dropdowns = document.querySelectorAll('.Dropdown-menu');
+        dropdowns.forEach(dropdown => {
+            if (!dropdown.contains(e.target) && !e.target.matches('.message-actions')) {
+                dropdown.classList.remove('show');
+            }
+        });
+    });
 });
 
 // Helper functions
@@ -134,9 +152,11 @@ function displayMessage(data) {
 
     const messageDiv = document.createElement("div");
     messageDiv.className = "message";
+    messageDiv.id = `message-${data._id}`;
 
-    // Get current username again to ensure it's up to date
+    // Get current username and role again to ensure it's up to date
     const currentUsername = localStorage.getItem('username') || 'Anonymous';
+    const currentUserRole = localStorage.getItem('userRole') || 'user';
 
     if (data.username === currentUsername) {
         messageDiv.classList.add("own-message");
@@ -144,14 +164,109 @@ function displayMessage(data) {
 
     const timestamp = new Date(data.timestamp).toLocaleTimeString();
 
-    messageDiv.innerHTML = `
-        <span class="message-username">${data.username}</span>
-        <span class="message-time">${timestamp}</span>
-        <div class="message-content">${data.message}</div>
-    `;
+    // Create message content
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "message-content";
+
+    if (data.isDeleted) {
+        contentDiv.innerHTML = `
+            <div class="message-text deleted">🚫 This message has been deleted</div>
+            <div class="message-timestamp">${timestamp}</div>
+        `;
+        contentDiv.classList.add("deleted");
+    } else {
+        contentDiv.innerHTML = `
+            <div class="message-text">${data.message}</div>
+            <div class="message-timestamp">${timestamp}</div>
+        `;
+
+        // Only add delete option if user is an admin
+        if (currentUserRole === 'admin') {
+            const actionsDiv = document.createElement("div");
+            actionsDiv.className = "message-actions";
+            actionsDiv.textContent = "⋮";
+            actionsDiv.addEventListener("click", (e) => {
+                e.stopPropagation();
+                toggleDropdown(data._id);
+            });
+
+            const dropdownDiv = document.createElement("div");
+            dropdownDiv.className = "Dropdown-menu";
+
+            const deleteOption = document.createElement("div");
+            deleteOption.className = "delete-option";
+            deleteOption.textContent = "Delete message";
+            deleteOption.addEventListener("click", (e) => {
+                e.stopPropagation();
+                deleteMessage(data._id);
+                dropdownDiv.classList.remove("show");
+            });
+
+            dropdownDiv.appendChild(deleteOption);
+            messageDiv.appendChild(actionsDiv);
+            messageDiv.appendChild(dropdownDiv);
+        }
+    }
+
+    // Add username display at the top
+    const usernameSpan = document.createElement("span");
+    usernameSpan.className = "message-username";
+    usernameSpan.textContent = data.username;
+
+    messageDiv.appendChild(usernameSpan);
+    messageDiv.appendChild(contentDiv);
 
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function toggleDropdown(messageId) {
+    // Close all other dropdowns first
+    document.querySelectorAll('.Dropdown-menu').forEach(dropdown => {
+        dropdown.classList.remove('show');
+    });
+
+    // Show the clicked dropdown
+    const dropdown = document.querySelector(`#message-${messageId} .Dropdown-menu`);
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+function updateDeletedMessage(messageId) {
+    const messageDiv = document.getElementById(`message-${messageId}`);
+    if (!messageDiv) return;
+
+    // Remove action buttons
+    const actions = messageDiv.querySelector('.message-actions');
+    const dropdown = messageDiv.querySelector('.Dropdown-menu');
+    if (actions) actions.remove();
+    if (dropdown) dropdown.remove();
+
+    // Update content to show deleted message
+    const contentDiv = messageDiv.querySelector('.message-content');
+    if (contentDiv) {
+        contentDiv.classList.add('deleted');
+        const messageText = contentDiv.querySelector('.message-text');
+        if (messageText) {
+            messageText.classList.add('deleted');
+            messageText.textContent = '🚫 This message has been deleted';
+        }
+    }
+}
+
+function deleteMessage(messageId) {
+    // Get the current user role
+    const userRole = localStorage.getItem('userRole') || 'user';
+
+    // Only allow admins to delete messages
+    if (userRole !== 'admin') {
+        console.log("Only admins can delete messages");
+        return;
+    }
+
+    console.log("Requesting message deletion:", messageId);
+    socket.emit("delete message", messageId);
 }
 
 function displaySystemMessage(message) {
@@ -253,3 +368,4 @@ window.joinChannel = joinChannel;
 window.joinDM = joinDM;
 window.displaySystemMessage = displaySystemMessage;
 window.closeChat = closeChat;
+window.sendMessage = sendMessage; // Export for use in standalone buttons

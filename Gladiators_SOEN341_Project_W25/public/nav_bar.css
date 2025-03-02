@@ -52,37 +52,6 @@ body {
   overflow: hidden;
 }
 
-/* My Teams Section */
-.teams-section {
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 12px;
-}
-
-.teams-title {
-  color: white;
-  font-weight: 600;
-  padding: 8px 16px;
-  margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-}
-
-.teams-title:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.teams-list {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-in-out;
-}
-
 .theme-toggle {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -623,6 +592,137 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+/* Message Deletion Styles */
+
+/* Message actions styling */
+.message-actions {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: var(--chat-message-text-color);
+  opacity: 0.8;
+}
+
+.message-actions:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown menu styling */
+.Dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: var(--chat-bg-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.Dropdown-menu.show {
+  display: block;
+}
+
+.delete-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #ff4444;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.delete-option:hover {
+  background-color: #ff4444;
+  color: white;
+}
+
+/* Style for deleted messages */
+.deleted-message {
+  color: #888;
+  font-style: italic;
+}
+
+/* Update message styling */
+.message {
+  margin-bottom: 8px;
+  padding: 12px 40px 12px 16px;
+  /* Increased right padding for actions */
+  background: var(--chat-message-bg);
+  color: var(--chat-message-text-color);
+  border-radius: 8px;
+  max-width: 80%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  word-break: break-word;
+}
+
+.message-username {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.deleted .message-text {
+  color: var(--chat-message-text-color);
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.message-text {
+  color: var(--chat-message-text-color);
+  word-wrap: break-word;
+}
+
+.message-timestamp {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  align-self: flex-end;
+  margin-top: 2px;
+}
+
+.deleted .message-timestamp {
+  opacity: 0.6;
+}
+
+/* Deleted message styling */
+.deleted-message {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--chat-message-text-color);
+  font-style: italic;
+  opacity: 0.9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.deleted .message-text {
+  color: var(--chat-message-text-color);
+  opacity: 0.8;
+  font-style: italic;
+  background: rgba(255, 0, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 3px solid rgba(255, 0, 0, 0.5);
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -680,4 +780,23 @@ body {
 
 .sidebar.collapsed~.dashboard-container .start-conversation-text {
   left: 50%;
+}
+
+/* Own messages styling */
+.own-message {
+  align-self: flex-end;
+  margin-left: auto;
+  background: linear-gradient(45deg, #2b5876, #4e4376);
+}
+
+/* System message styling */
+.system-message {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-style: italic;
+  text-align: center;
+  padding: 6px 12px;
+  margin: 8px auto;
+  border-radius: 16px;
+  max-width: 70%;
 }
