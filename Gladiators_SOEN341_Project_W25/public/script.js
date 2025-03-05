@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const loginBtn = document.getElementById("loginBtn");
 
     if (loginBtn) {
-        loginBtn.addEventListener("click", () => window.location.href = "login.html");
+        loginBtn.addEventListener("click", () => window.location.href = "/login");
     }
 
     // Handle registration form
