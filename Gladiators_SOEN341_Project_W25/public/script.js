@@ -61,6 +61,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("userRole", data.role);
 
+                // IMPORTANT: Store the username in localStorage
+                localStorage.setItem("username", username);
+
                 // Redirect based on role
                 if (data.role === "admin") {
                     window.location.href = "admin.html";

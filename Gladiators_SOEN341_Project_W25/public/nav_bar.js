@@ -1,455 +1,363 @@
-const channelList = document.getElementById('channelList');
-const noChannels = document.getElementById('noChannels');
-let channels = []; // Start with no channels
+// nav_bar.js - with fixes to preserve user chat functionality
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize UI elements
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const channelList = document.getElementById('channelList');
+    const noChannels = document.getElementById('noChannels');
+    const searchInput = document.getElementById('searchInput');
+    const chatArea = document.getElementById('chatArea');
+    const welcomeText = document.getElementById('welcomeText');
+    const startConversationText = document.getElementById('startConversationText');
+    const addChannelForm = document.getElementById('addChannelForm');
+    const addChannelTitle = document.querySelector('.add-channel-title');
+    const dmTitle = document.querySelector('.dm-title');
+    const dmDropdown = document.getElementById('dmDropdown');
+    const addFriendForm = document.getElementById('addFriendForm');
+    const addFriendTitle = document.querySelector('.add-friend-title');
 
-// Theme toggle
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = themeToggle.querySelector('.theme-toggle-icon');
-const themeText = themeToggle.querySelector('.theme-toggle-text');
+    // Check if we're on the admin page
+    const isAdminPage = window.location.pathname.includes('admin');
 
-function toggleTheme() {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
 
-    html.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-
-    // Update icon and text
-    themeIcon.textContent = newTheme === 'light' ? '🌑' : '☀️';
-    themeText.textContent = `${newTheme === 'light' ? 'Dark' : 'Light'} mode`;
-}
-
-// Locally store theme
-const savedTheme = localStorage.getItem('theme') || 'light';
-document.documentElement.setAttribute('data-theme', savedTheme);
-themeIcon.textContent = savedTheme === 'light' ? '🌑' : '☀️';
-themeText.textContent = `${savedTheme === 'light' ? 'Dark' : 'Light'} mode`;
-
-themeToggle.addEventListener('click', toggleTheme);
-
-const searchInput = document.getElementById('searchInput');
-
-let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-let recentChannels = JSON.parse(localStorage.getItem('recentChannels')) || [];
-
-// Section states
-let sectionStates = JSON.parse(localStorage.getItem('sectionStates')) || {
-    favorites: false,
-    recent: false,
-    available: false
-};
-
-// Toggle section visibility
-function toggleSection(sectionName) {
-    const section = document.querySelector(`.${sectionName}-list`);
-    const button = document.querySelector(`.${sectionName}-title`);
-    sectionStates[sectionName] = !sectionStates[sectionName];
-
-    // Update the arrow and section visibility
-    button.querySelector('.arrow').textContent = sectionStates[sectionName] ? '▼' : '▶';
-    section.style.maxHeight = sectionStates[sectionName] ? `${section.scrollHeight}px` : '0';
-
-    // Save state to localStorage
-    localStorage.setItem('sectionStates', JSON.stringify(sectionStates));
-}
-
-// Create channel buttons
-function createChannelButtons() {
-    channelList.innerHTML = '';
-    channels.forEach((channel, index) => {
-        const channelId = `channel-${index + 1}`;
-        const isFavorite = favorites.includes(channelId);
-
-        const button = document.createElement('button');
-        button.className = 'channel-button';
-        button.id = channelId;
-        button.innerHTML = `
-            <span>${channel}</span>
-            <span class="star-icon" data-channel-id="${channelId}">${isFavorite ? '★' : '☆'}</span>
-        `;
-
-        button.querySelector('.star-icon').addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleFavorite(e.target.dataset.channelId);
-        });
-
-        button.addEventListener('click', () => selectChannel(channelId));
-        channelList.appendChild(button);
-    });
-    noChannels.style.display = channels.length === 0 ? 'block' : 'none';
-    updateChannelStars();
-
-    // Show the welcome messages and hide the chat area
-    welcomeText.style.display = 'flex';
-    startConversationText.style.display = 'flex';
-    chatArea.style.display = 'none';
-
-    //reset title
-    document.getElementById('channelTitle').textContent = '';
-    document.getElementById('chatTitle').textContent = 'Channel/Recipient Name';
-    selectedChat = null; // Reset selected chat
-    loadChatHistory();
-}
-
-//Data Store
-let chatHistory = {}; // Store chat messages per channel/friend
-let selectedChat = null; // to store selected chat id (channel or friend)
-
-//Select a Channel
-function selectChannel(channelId) {
-  document.querySelectorAll('.channel-button').forEach(btn => {
-      btn.classList.remove('active');
-  });
-
-  const channelButton = document.getElementById(channelId);
-  const channelNumber = channelId.split('-')[1];
-  const channelName = channels[channelNumber - 1];
-
-  channelButton.classList.add('active');
-  document.title = `ChatHaven • ${channelName}`;
-  document.getElementById('channelTitle').textContent = channelName;
-  document.getElementById('chatTitle').textContent = channelName; // Set the chat title here!
-
-  selectedChat = channelId; // Set the selected chat
-  addToRecentChannels(channelId);
-
-  // Show the chat area and hide the welcome messages
-  welcomeText.style.display = 'none';
-  startConversationText.style.display = 'none';
-  chatArea.style.display = 'flex';
-
-  loadChatHistory();
-}
-
-// Load chat history and displays in messages
-function loadChatHistory() {
-    chatMessages.innerHTML = ''; // Clear existing messages
-    if (selectedChat && chatHistory[selectedChat]) {
-        chatHistory[selectedChat].forEach(message => {
-            const messageElem = document.createElement('div');
-            messageElem.className = 'chat-message';
-
-            messageElem.innerHTML = `
-              <span class="chat-message-text">${message.text}</span>
-              <span class="chat-message-time">${message.timestamp}</span>
-            `;
-
-            chatMessages.appendChild(messageElem);
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
         });
     }
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
 
-// Add channel to recent list
-function addToRecentChannels(channelId) {
-    recentChannels = recentChannels.filter(id => id !== channelId);
-    recentChannels.unshift(channelId);
-    recentChannels = recentChannels.slice(0, 5);
-    localStorage.setItem('recentChannels', JSON.stringify(recentChannels));
-    updateRecentList();
-}
-
-// Update the recent channels list
-function updateRecentList() {
-    const recentList = document.getElementById('recentList');
-    recentList.innerHTML = '';
-
-    recentChannels.forEach(channelId => {
-        const index = parseInt(channelId.split('-')[1]) - 1;
-        const channelName = channels[index];
-        const isFavorite = favorites.includes(channelId);
-
-        const button = document.createElement('button');
-        button.className = 'channel-button recent';
-        button.innerHTML = `
-            <span>${channelName}</span>
-            <span class="star-icon" data-channel-id="${channelId}">${isFavorite ? '★' : '☆'}</span>
-        `;
-
-        button.querySelector('.star-icon').addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleFavorite(e.target.dataset.channelId);
+    // Sidebar toggle functionality
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '➡️' : '⬅️';
         });
-
-        button.addEventListener('click', () => selectChannel(channelId));
-        recentList.appendChild(button);
-    });
-
-    if (sectionStates.recent) {
-        const section = document.querySelector('.recent-list');
-        section.style.maxHeight = `${section.scrollHeight}px`;
     }
-}
 
-// Update channel stars
-function updateChannelStars() {
-    document.querySelectorAll('.channel-button').forEach(button => {
-        const star = button.querySelector('.star-icon');
-        if (star) {
-            const channelId = star.dataset.channelId;
-            star.textContent = favorites.includes(channelId) ? '★' : '☆';
-        }
-    });
-}
+    // Fetch users to populate DM List
+    async function loadUsers() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
 
-// Toggle favorite
-function toggleFavorite(channelId) {
-    const index = favorites.indexOf(channelId);
-    if (index === -1) {
-        favorites.push(channelId);
-    } else {
-        favorites.splice(index, 1);
-    }
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-    updateChannelStars();
-    updateFavoritesList();
-    updateRecentList();
-}
-
-// Update favorites list
-function updateFavoritesList() {
-    const favoritesList = document.getElementById('favoritesList');
-    favoritesList.innerHTML = '';
-
-    if (favorites.length === 0) {
-        favoritesList.innerHTML = '<p class="empty-message">No favorite channels</p>';
-    } else {
-        favorites.forEach(channelId => {
-            const index = parseInt(channelId.split('-')[1]) - 1;
-            const channelName = channels[index];
-
-            const button = document.createElement('button');
-            button.className = 'channel-button favorite';
-            button.innerHTML = `
-                <span>${channelName}</span>
-                <span class="star-icon" data-channel-id="${channelId}">★</span>
-            `;
-
-            button.querySelector('.star-icon').addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleFavorite(e.target.dataset.channelId);
+            const response = await fetch('http://localhost:5000/users', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
-            button.addEventListener('click', () => selectChannel(channelId));
-            favoritesList.appendChild(button);
-        });
-    }
+            if (!response.ok) {
+                throw new Error('Failed to fetch users');
+            }
 
-    if (sectionStates.favorites) {
-        const section = document.querySelector('.favorites-list');
-        section.style.maxHeight = `${section.scrollHeight}px`;
-    }
-}
-
-// Search functionality
-searchInput.addEventListener('input', function() {
-    const query = this.value.toLowerCase();
-    let visibleCount = 0;
-
-    document.querySelectorAll('.channel-button').forEach(button => {
-        const text = button.textContent.toLowerCase();
-        const isVisible = text.includes(query);
-        button.style.display = isVisible ? 'flex' : 'none';
-        if (isVisible) visibleCount++;
-    });
-
-    noChannels.classList.toggle('show', visibleCount === 0);
-});
-
-// Available Users Management
-let availableUsers = JSON.parse(localStorage.getItem('availableUsers')) || ['Ellie', 'Juan', 'Victor', 'John John'];
-
-function updateAvailableUsersList() {
-    const usersList = document.getElementById('usersList');
-    usersList.innerHTML = '';
-
-    availableUsers.forEach(user => {
-        const userButton = document.createElement('button');
-        userButton.className = 'channel-button available';
-        userButton.innerHTML = `<span>${user}</span>`;
-        userButton.addEventListener('click', () => {
-            document.getElementById('chatTitle').textContent = user;
-            // Show the chat area and hide the welcome messages
-            welcomeText.style.display = 'none';
-            startConversationText.style.display = 'none';
-            chatArea.style.display = 'flex';
-
-            selectedChat = user; // Set the selected chat
-            loadChatHistory();
-        });
-        usersList.appendChild(userButton);
-    });
-
-    localStorage.setItem('availableUsers', JSON.stringify(availableUsers));
-
-    if (sectionStates.available) {
-        usersList.style.maxHeight = `${usersList.scrollHeight}px`;
-    }
-}
-
-// Initialize sections
-function initializeSections() {
-    // Favorites section
-    const favoritesTitle = document.querySelector('.favorites-title');
-    favoritesTitle.innerHTML = `<span class="arrow">${sectionStates.favorites ? '▼' : '▶'}</span> Favorite channels ⭐`;
-    favoritesTitle.addEventListener('click', () => toggleSection('favorites'));
-
-    // Recent section
-    const recentTitle = document.querySelector('.recent-title');
-    recentTitle.innerHTML = `<span class="arrow">${sectionStates.recent ? '▼' : '▶'}</span> Recent channels 🕒`;
-    recentTitle.addEventListener('click', () => toggleSection('recent'));
-
-    // Available users section
-    const availableTitle = document.querySelector('.dropdown-title');
-    availableTitle.innerHTML = `<span class="arrow">${sectionStates.available ? '▼' : '▶'}</span> Available ❇️`;
-    availableTitle.addEventListener('click', () => {
-        sectionStates.available = !sectionStates.available;
-        const usersList = document.getElementById('usersList');
-        usersList.style.maxHeight = sectionStates.available ? `${usersList.scrollHeight}px` : '0';
-        availableTitle.querySelector('.arrow').textContent = sectionStates.available ? '▼' : '▶';
-        localStorage.setItem('sectionStates', JSON.stringify(sectionStates));
-    });
-
-    // Apply initial states
-    const lists = {
-        favorites: document.querySelector('.favorites-list'),
-        recent: document.querySelector('.recent-list'),
-        available: document.getElementById('usersList')
-    };
-
-    Object.keys(lists).forEach(key => {
-        if (lists[key]) {
-            lists[key].style.maxHeight = sectionStates[key] ? `${lists[key].scrollHeight}px` : '0';
+            const users = await response.json();
+            populateUserList(users);
+        } catch (error) {
+            console.error('Error fetching users:', error);
         }
-    });
-}
-
-// Add Channel functionality
-const addChannelTitle = document.querySelector('.add-channel-title');
-const addChannelForm = document.getElementById('addChannelForm');
-
-addChannelTitle.addEventListener('click', () => {
-    addChannelForm.style.display = addChannelForm.style.display === 'none' ? 'block' : 'none';
-});
-
-addChannelForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const newChannelName = document.getElementById('newChannelName').value.trim();
-    if (newChannelName) {
-        createNewChannel(newChannelName);
-        document.getElementById('newChannelName').value = '';
-        addChannelForm.style.display = 'none';
     }
-});
 
-// Add Friend functionality
-const addFriendTitle = document.querySelector('.add-friend-title');
-const addFriendForm = document.getElementById('addFriendForm');
+    // Function to populate the DM dropdown list with users
+    function populateUserList(users) {
+        const dmDropdownList = document.getElementById('dmDropdownList');
+        if (!dmDropdownList) {
+            return;
+        }
 
-addFriendTitle.addEventListener('click', () => {
-    addFriendForm.style.display = addFriendForm.style.display === 'none' ? 'block' : 'none';
-});
+        dmDropdownList.innerHTML = ''; // Clear existing items
+        const currentUser = localStorage.getItem('username');
 
-addFriendForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const newFriendName = document.getElementById('newFriendName').value.trim();
-    if (newFriendName && !availableUsers.includes(newFriendName)) {
-        availableUsers.push(newFriendName);
-        updateAvailableUsersList();
-        document.getElementById('newFriendName').value = '';
-        addFriendForm.style.display = 'none';
+        users.forEach(user => {
+            // Skip the current user so you don't join a DM with yourself
+            if (user.username === currentUser) return;
 
-        // Open the available users section
-        sectionStates.available = true;
-        const usersList = document.getElementById('usersList');
-        usersList.style.maxHeight = `${usersList.scrollHeight}px`;
-        document.querySelector('.dropdown-title .arrow').textContent = '▼';
-        localStorage.setItem('sectionStates', JSON.stringify(sectionStates));
+            const li = document.createElement('li');
+            li.className = 'dm-item';
+            li.textContent = user.username || 'Unknown User';
+
+            // When a user is clicked, open a DM with that user
+            li.addEventListener('click', () => {
+                // Reset active state on all channel buttons
+                document.querySelectorAll('.channel-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // For admin page
+                if (isAdminPage && typeof window.handleAdminChannelClick === 'function') {
+                    // Special handling for admin page will be added later
+                } else {
+                    // Regular chat page behavior
+                    if (chatArea) chatArea.style.display = 'flex';
+                    if (welcomeText) welcomeText.style.display = 'none';
+                    if (startConversationText) startConversationText.style.display = 'none';
+                }
+
+                // Call joinDM function from messaging.js
+                if (typeof window.joinDM === 'function') {
+                    window.joinDM(user.username);
+                }
+
+                // Hide the dropdown after selection
+                if (dmDropdown) dmDropdown.style.display = 'none';
+            });
+
+            dmDropdownList.appendChild(li);
+        });
     }
-});
 
-// Chat functionality
-const chatForm = document.getElementById('chatForm');
-const chatInput = document.getElementById('chatInput');
-const chatMessages = document.getElementById('chatMessages');
+    // Channel management functions
+    async function fetchChannels() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
 
-chatForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const messageText = chatInput.value.trim();
-  if (messageText && selectedChat) {
-      const now = new Date();
-      const timestamp = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const response = await fetch('http://localhost:5000/channels', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-      const message = {
-          text: messageText,
-          timestamp: timestamp
-      };
+            if (!response.ok) {
+                throw new Error('Failed to fetch channels');
+            }
 
-      // Initialize chat history for the selected chat if it doesn't exist
-      if (!chatHistory[selectedChat]) {
-          chatHistory[selectedChat] = [];
-      }
+            const channels = await response.json();
+            displayChannels(channels);
+        } catch (error) {
+            console.error('Error fetching channels:', error);
+            if (noChannels) {
+                noChannels.style.display = 'block';
+                noChannels.textContent = 'Error loading channels';
+            }
+        }
+    }
 
-      // Add the message to the chat history
-      chatHistory[selectedChat].push(message);
+    function displayChannels(channels) {
+        if (!channelList) return;
 
-      const messageElem = document.createElement('div');
-      messageElem.className = 'chat-message';
+        channelList.innerHTML = ''; // Clear existing channels
+        if (noChannels) {
+            noChannels.style.display = channels.length === 0 ? 'block' : 'none';
+        }
 
-      messageElem.innerHTML = `
-        <span class="chat-message-text">${message.text}</span>
-        <span class="chat-message-time">${message.timestamp}</span>
-      `;
+        // Filter the channels by type
+        const teamChannels = channels.filter(channel => channel.type === 'channel' || !channel.type);
+        const dmChannels = channels.filter(channel => channel.type === 'dm');
 
-      chatMessages.appendChild(messageElem);
-      chatInput.value = '';
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-});
+        // Display regular team channels
+        teamChannels.forEach(channel => {
+            const channelButton = document.createElement('button');
+            channelButton.className = 'channel-button';
+            channelButton.innerHTML = `
+                <span class="channel-icon">#</span>
+                <span class="channel-name">${channel.name}</span>
+            `;
 
-function closeChat() {
-    // Show the welcome messages and hide the chat area
-    welcomeText.style.display = 'flex';
-    startConversationText.style.display = 'flex';
-    chatArea.style.display = 'none';
-    document.title = 'ChatHaven • My channels'; // Reset title
-    document.getElementById('channelTitle').textContent = '';
-    document.getElementById('chatTitle').textContent = 'Channel/Recipient Name';
-    selectedChat = null; // Reset selected chat
-    loadChatHistory();
-}
+            channelButton.addEventListener('click', () => {
+                // Remove active class from all channels
+                document.querySelectorAll('.channel-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
 
-// Create new channel helper function
-function createNewChannel(channelName) {
-    channels.push(channelName);
-    createChannelButtons();
-}
+                // Add active class to clicked channel
+                channelButton.classList.add('active');
 
-const welcomeText = document.getElementById('welcomeText');
-const startConversationText = document.getElementById('startConversationText');
-const chatArea = document.getElementById('chatArea');
+                // Different behavior on admin page
+                if (isAdminPage && typeof window.handleAdminChannelClick === 'function') {
+                    window.handleAdminChannelClick(channel._id, channel.name);
+                } else {
+                    // Regular chat page behavior - show chat area and hide welcome text
+                    if (chatArea) chatArea.style.display = 'flex';
+                    if (welcomeText) welcomeText.style.display = 'none';
+                    if (startConversationText) startConversationText.style.display = 'none';
+                    if (document.getElementById('chatTitle'))
+                        document.getElementById('chatTitle').textContent = channel.name;
 
-// Initialize everything
-createChannelButtons();
-updateAvailableUsersList();
-initializeSections();
-updateFavoritesList();
-updateRecentList();
+                    // Join the channel (using the messaging.js functionality)
+                    if (typeof window.joinChannel === 'function') {
+                        window.joinChannel(channel._id);
+                    }
+                }
+            });
 
-const sidebar = document.getElementById('sidebar');
-const sidebarToggle = document.getElementById('sidebarToggle');
-const dashboardContainer = document.getElementById('dashboardContainer');
+            channelList.appendChild(channelButton);
+        });
 
-sidebarToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('collapsed');
-    dashboardContainer.classList.toggle('expanded');
-});
+        // Add DM channels to a separate section if any exist
+        if (dmChannels.length > 0) {
+            const dmSection = document.createElement('div');
+            dmSection.className = 'dm-channels-section';
+            dmSection.innerHTML = '<h3>Direct Messages</h3>';
 
-// Sidebar toggle - make sure menu collapses on page load
-window.addEventListener('load', () => {
-  if (!sidebar.classList.contains('collapsed')){
-    sidebar.classList.add('collapsed');
-    dashboardContainer.classList.remove('expanded');
-  }
+            dmChannels.forEach(channel => {
+                // For DM channels, extract the other username from the format "user1_user2"
+                const currentUsername = localStorage.getItem('username');
+                const dmName = channel.name.split('_');
+                const otherUser = dmName[0] === currentUsername ? dmName[1] : dmName[0];
+
+                const dmButton = document.createElement('button');
+                dmButton.className = 'channel-button dm-button';
+                dmButton.innerHTML = `
+                    <span class="channel-icon">@</span>
+                    <span class="channel-name">${otherUser}</span>
+                `;
+
+                dmButton.addEventListener('click', () => {
+                    // Remove active class from all channels
+                    document.querySelectorAll('.channel-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+
+                    // Add active class to clicked DM
+                    dmButton.classList.add('active');
+
+                    // Different behavior on admin page
+                    if (isAdminPage && typeof window.handleAdminChannelClick === 'function') {
+                        window.handleAdminChannelClick(channel._id, otherUser);
+                    } else {
+                        // Regular chat page behavior
+                        if (chatArea) chatArea.style.display = 'flex';
+                        if (welcomeText) welcomeText.style.display = 'none';
+                        if (startConversationText) startConversationText.style.display = 'none';
+                        if (document.getElementById('chatTitle'))
+                            document.getElementById('chatTitle').textContent = otherUser;
+
+                        // Join the DM channel
+                        if (typeof window.joinChannel === 'function') {
+                            window.joinChannel(channel._id);
+                        }
+                    }
+                });
+
+                dmSection.appendChild(dmButton);
+            });
+
+            channelList.appendChild(dmSection);
+        }
+    }
+
+    // Search functionality
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const channelButtons = channelList.getElementsByClassName('channel-button');
+
+            Array.from(channelButtons).forEach(button => {
+                const channelName = button.querySelector('.channel-name').textContent.toLowerCase();
+                button.style.display = channelName.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+    }
+
+    // Add channel form toggle
+    if (addChannelTitle && addChannelForm) {
+        addChannelTitle.addEventListener('click', () => {
+            addChannelForm.style.display = addChannelForm.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    // DM dropdown toggle
+    if (dmTitle && dmDropdown) {
+        dmTitle.addEventListener('click', () => {
+            if (dmDropdown.style.display === 'none' || dmDropdown.style.display === '') {
+                dmDropdown.style.display = 'block';
+                loadUsers(); // Refresh the list when opening
+            } else {
+                dmDropdown.style.display = 'none';
+            }
+        });
+    }
+
+    // Add friend form toggle
+    if (addFriendTitle && addFriendForm) {
+        addFriendTitle.addEventListener('click', () => {
+            addFriendForm.style.display = addFriendForm.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    // Add friend form submission
+    if (addFriendForm) {
+        addFriendForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const friendName = document.getElementById('newFriendName').value.trim();
+
+            if (!friendName) {
+                alert('Please enter a valid username');
+                return;
+            }
+
+            try {
+                // Start a direct message with this user
+                if (typeof window.joinDM === 'function') {
+                    window.joinDM(friendName);
+
+                    // Clear and hide the form
+                    document.getElementById('newFriendName').value = '';
+                    addFriendForm.style.display = 'none';
+
+                    // Refresh channels to show the new DM
+                    setTimeout(fetchChannels, 1000);
+                } else {
+                    throw new Error('joinDM function not found');
+                }
+            } catch (error) {
+                console.error('Error adding friend:', error);
+                alert('Failed to add friend. Please check the username and try again.');
+            }
+        });
+    }
+
+    // Add channel form submission
+    if (addChannelForm) {
+        addChannelForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const channelName = document.getElementById('newChannelName').value;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:5000/admin/channel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: channelName,
+                        teamName: localStorage.getItem('team'), // Assuming team is stored in localStorage
+                        users: [localStorage.getItem('username')] // Add current user to channel
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create channel');
+                }
+
+                // Clear form and hide it
+                document.getElementById('newChannelName').value = '';
+                addChannelForm.style.display = 'none';
+
+                // Refresh channels list
+                fetchChannels();
+            } catch (error) {
+                console.error('Error creating channel:', error);
+                alert('Failed to create channel');
+            }
+        });
+    }
+
+    // Make fetchChannels available globally so admin.js can trigger refreshes
+    window.fetchChannels = fetchChannels;
+
+    // Initialize channels on page load
+    fetchChannels();
 });

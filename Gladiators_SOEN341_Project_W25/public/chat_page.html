@@ -1,23 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Page</title>
-    <link rel="stylesheet" href="./style_ChatPage.css"> <!-- Link to CSS -->
+    <link rel="stylesheet" href="style_ChatPage.css">
+    <link rel="stylesheet" href="nav_bar.css">
+    <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
-    <button onclick="closeChat()" style="position: absolute; top: 20px; right: 20px;">Close Chat</button>
-    <div class="chat-container">
-        <div class="chat-box" id="chat-box"></div>
-        <div class="input-container">
-            <input type="text" id="message-input" placeholder="Type a message...">
-            <button onclick="sendMessage()">Send</button>
+    <!-- Include the navigation bar from nav_bar.html -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span>ChatHaven</span>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
+        </form>
+        <div class="add-channel-section">
+            <div class="add-channel-title">
+                <span class="add-icon">➕</span> Create Channel 🆕
+            </div>
+            <form id="addChannelForm" style="display: none;">
+                <input type="text" id="newChannelName" placeholder="Channel name" required>
+                <button type="submit" class="create-channel-btn">Create</button>
+            </form>
+        </div>
+        <div class="add-friend-section">
+            <div class="add-friend-title">
+                <span class="add-icon">➕</span> Add friend 🫂
+            </div>
+            <form id="addFriendForm" style="display: none;">
+                <input type="text" id="newFriendName" placeholder="Friend name" required>
+                <button type="submit" class="add-friend-btn">Add</button>
+            </form>
+        </div>
+        <div class="favorites-section">
+            <div class="favorites-title">Favorite channels ⭐</div>
+            <div class="favorites-list" id="favoritesList"></div>
+        </div>
+        <div class="recent-section">
+            <div class="recent-title">Recent channels 🕒</div>
+            <div class="recent-list" id="recentList"></div>
+        </div>
+        <div class="channel-list" id="channelList">
+            <div class="no-channels" id="noChannels">No channels found</div>
+        </div>
+        <div class="dropdown-menu">
+            <div class="dropdown-title">Available ❇️</div>
+            <div class="dropdown-list" id="usersList"></div>
         </div>
     </div>
 
-    <script src="messaging.js"></script> <!-- Link to JavaScript file -->
-</body>
-</html>
+    <button id="sidebarToggle" class="sidebar-toggle">⬅️</button>
 
-<!-- unauthenticated file -->
+    <!-- Main Chat Area -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <h1 class="channel-title" id="channelTitle"></h1>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="theme-toggle-icon">🌓</span>
+            <span class="theme-toggle-text">Toggle theme</span>
+        </button>
+
+        <p class="welcome-text" id="welcomeText">Welcome to ChatHaven!</p>
+        <p class="start-conversation-text" id="startConversationText">Select a channel or friend to start chatting.</p>
+
+        <div class="chat-area" id="chatArea">
+            <button class="close-chat-btn" onclick="closeChat()">Close Chat</button>
+            <div class="chat-header">
+                <h2 id="chatTitle">Channel/Recipient Name</h2>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <form id="chatForm" class="chat-form">
+                <input type="text" id="chatInput" placeholder="Type your message here..." autocomplete="off">
+                <button type="button" onclick="sendMessage()">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Include the Socket.IO messaging and nav bar scripts -->
+    <script src="messaging.js"></script>
+    <script src="nav_bar.js"></script>
+</body>
+
+</html>
