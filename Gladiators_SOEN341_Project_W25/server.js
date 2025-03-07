@@ -1,4 +1,4 @@
-// server.js with admin-only delete functionality
+// server.js with homepage as the first page to load
 const express = require("express");
 const mongoose = require("mongoose");
 const http = require("http");
@@ -6,11 +6,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO integration - FIXED: Move socket.io setup before routes
+// Socket.IO integration 
 const io = require("socket.io")(server, {
     cors: {
         origin: "*",
@@ -19,7 +20,6 @@ const io = require("socket.io")(server, {
 });
 
 // Configure middleware
-app.use(express.static("public"));
 app.use(express.json());
 app.use(cors());
 
@@ -71,7 +71,7 @@ const messageSchema = new mongoose.Schema({
     username: { type: String, required: true },
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    isDeleted: { type: Boolean, default: false } // Add isDeleted field for message deletion
+    isDeleted: { type: Boolean, default: false } // isDeleted field for message deletion
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -240,14 +240,50 @@ function isAdmin(req, res, next) {
     next();
 }
 
-// Routes
-
 //******************************GET Methods************************************//
 
-// 1. Home Page
+// 1. Home Page (serves homepage.html)
 app.get("/", (req, res) => {
+    console.log("Root route accessed, serving homepage.html");
+    const homepagePath = path.join(__dirname, "public", "homepage.html");
+
+    if (fs.existsSync(homepagePath)) {
+        console.log(`✅ homepage.html found at ${homepagePath}`);
+        res.sendFile(homepagePath);
+    } else {
+        console.error(`❌ ERROR: homepage.html NOT found at ${homepagePath}`);
+        res.status(404).send("Homepage not found - please make sure homepage.html exists in the public folder");
+    }
+});
+
+// 2. Registration Page (serves index.html)
+app.get("/register", (req, res) => {
+    console.log("Register route accessed, serving index.html");
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+// 3. Login Page (serves login.html)
+app.get("/login", (req, res) => {
+    console.log("Login route accessed, serving login.html");
+    const loginPath = path.join(__dirname, "public", "login.html");
+
+    if (fs.existsSync(loginPath)) {
+        res.sendFile(loginPath);
+    } else {
+        console.error(`Login page not found at ${loginPath}`);
+        // Fallback to index.html if login.html doesn't exist
+        res.sendFile(path.join(__dirname, "public", "index.html"));
+    }
+});
+
+// Redirect direct access to index.html to /register route
+app.get("/index.html", (req, res) => {
+    console.log("Redirecting from direct index.html access to register route");
+    res.redirect("/register");
+});
+
+// Setup static middleware AFTER routes with index:false
+app.use(express.static("public", { index: false }));
 
 // Get all users
 app.get('/users', authenticate, async (req, res) => {
@@ -597,6 +633,7 @@ app.post("/admin/channel", authenticate, isAdmin, async (req, res) => {
     }
 });
 
+// Catch-all 404 route handler - place at the end
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" }); // Error 404 Page
 });
