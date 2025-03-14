@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nav_bar.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span>ChatHaven</span>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
+        </form>
+        <div class="add-friend-section">
+            <div class="add-friend-title">
+                <span class="add-icon">➕</span> Add friend 🫂
+            </div>
+            <form id="addFriendForm" style="display: none;">
+                <input type="text" id="newFriendName" placeholder="Friend name" required>
+                <button type="submit" class="add-friend-btn">Add</button>
+            </form>
+        </div>
+        <div class="channel-list" id="channelList">
+            <div class="no-channels" id="noChannels">No channels found</div>
+        </div>
+    </div>
+
+    <!-- Admin main content area -->
+    <div class="admin-main">
+        <h1>Admin Dashboard</h1>
+
+        <!-- Create Team Section -->
+        <div class="admin-section">
+            <h2>Create a Team</h2>
+            <form id="createTeamForm">
+                <div>
+                    <label for="teamName">Team Name:</label>
+                    <input type="text" id="teamName" placeholder="Enter team name" required>
+                </div>
+                <div>
+                    <label for="teamUsers">Team Members (comma-separated usernames):</label>
+                    <textarea id="teamUsers" placeholder="user1, user2, user3" required></textarea>
+                </div>
+                <button type="submit">Create Team</button>
+            </form>
+            <div id="team-result" class="result-message"></div>
+        </div>
+
+        <!-- Create Channel Section -->
+        <div class="admin-section">
+            <h2>Create a Channel</h2>
+            <form id="createChannelForm">
+                <div>
+                    <label for="channelName">Channel Name:</label>
+                    <input type="text" id="channelName" placeholder="Enter channel name" required>
+                </div>
+                <div>
+                    <label for="channelTeam">Team:</label>
+                    <select id="channelTeam" required>
+                    </select>
+                </div>
+                <div>
+                    <label for="channelUsers">Channel Members (comma-separated usernames):</label>
+                    <textarea id="channelUsers" placeholder="user1, user2, user3" required></textarea>
+                </div>
+                <button type="submit">Create Channel</button>
+            </form>
+            <div id="channel-result" class="result-message"></div>
+        </div>
+
+        <!-- View Teams Section -->
+        <div class="admin-section">
+            <h2>Teams</h2>
+            <ul id="adminTeamList">
+                <!-- Teams will be populated dynamically -->
+            </ul>
+        </div>
+
+        <!-- View Channels Section -->
+        <div class="admin-section">
+            <h2>Channels</h2>
+            <ul id="adminChannelList">
+                <!-- Channels will be populated dynamically -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Chat Area (Initially hidden) -->
+    <div class="chat-area" id="chatArea" style="display: none;">
+        <button class="close-chat-btn" onclick="closeChat()">Close Chat</button>
+        <div class="chat-header">
+            <h2 id="chatTitle">Channel/Recipient Name</h2>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Chat messages will appear here -->
+        </div>
+        <form id="chatForm" class="chat-form">
+            <input type="text" id="chatInput" placeholder="Type your message here..." autocomplete="off">
+            <button type="submit" id="sendButton">Send</button>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="authenticate.js"></script>
+    <script src="messaging.js"></script>
+    <script src="admin.js"></script>
+    <script src="nav_bar.js"></script>
+</body>
+
+</html>

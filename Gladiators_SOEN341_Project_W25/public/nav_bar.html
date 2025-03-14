@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ChatHeaven • My channels</title>
+    <link rel="stylesheet" href="nav_bar.css">
+    <link rel="icon" type="image/png" href="icon.png">
+</head>
+
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span>ChatHaven</span>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
+        </form>
+        <!-- Add Channel Section -->
+        <div class="add-channel-section">
+            <div class="add-channel-title">
+                <span class="add-icon">➕</span> Create Channel 🆕
+            </div>
+            <form id="addChannelForm" style="display: none;">
+                <input type="text" id="newChannelName" placeholder="Channel name" required>
+                <button type="submit" class="create-channel-btn">Create</button>
+            </form>
+        </div>
+
+        <!-- Direct Message Section -->
+        <div class="dm-section">
+            <div class="dm-title">
+                <span class="add-icon">⮟</span> Direct Message 💬
+            </div>
+            <div class="dm-dropdown" id="dmDropdown" style="display: none;">
+                <ul class="dm-dropdown-list" id="dmDropdownList">
+                    <!-- Dynamically Populated -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- My Teams Section -->
+        <div class="teams-section">
+            <div class="teams-title">My Teams 🏠</div>
+            <div class="teams-list" id="teamList"></div>
+        </div>
+
+        <!-- Favorites Section -->
+        <div class="favorites-section">
+            <div class="favorites-title">Favorite channels ⭐</div>
+            <div class="favorites-list" id="favoritesList"></div>
+        </div>
+
+        <!-- Recent Section -->
+        <div class="recent-section">
+            <div class="recent-title">Recent channels 🕒</div>
+            <div class="recent-list" id="recentList"></div>
+        </div>
+
+        <div class="channel-list" id="channelList">
+            <div class="no-channels" id="noChannels">No channels found</div>
+        </div>
+
+        <!-- Dropdown menu for available users -->
+        <div class="dropdown-menu">
+            <div class="dropdown-title">Available ❇️</div>
+            <div class="dropdown-list" id="usersList"></div>
+        </div>
+    </div>
+
+    <button id="sidebarToggle" class="sidebar-toggle">⬅️</button>
+
+    <div class="dashboard-container" id="dashboardContainer">
+        <h1 class="channel-title" id="channelTitle"></h1>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="theme-toggle-icon">🌓</span>
+            <span class="theme-toggle-text">Toggle theme</span>
+        </button>
+
+        <!-- Welcome message -->
+        <p class="welcome-text" id="welcomeText">Welcome to ChatHaven!</p>
+        <p class="start-conversation-text" id="startConversationText">Select a channel or friend to start chatting.</p>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatArea" style="display: none;">
+            <button class="close-chat-btn" onclick="closeChat()">Close Chat</button>
+            <div class="chat-header">
+                <h2 id="chatTitle">Channel/Recipient Name</h2>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <form id="chatForm" class="chat-form">
+                <input type="text" id="chatInput" placeholder="Type your message here..." autocomplete="off">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Include Socket.IO client-side script -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Include the chat messaging script -->
+    <script src="messaging.js"></script>
+
+    <!-- Include navigation bar script -->
+    <script src="nav_bar.js" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatHaven - Home</title>
+    <link rel="stylesheet" href="./homepage.css"> <!-- Link to CSS -->
+</head>
+
+<body>
+    <div class="homepage-container">
+        <!-- Left section for video -->
+        <div class="left-section">
+            <img src="Bubble.gif" alt="Bubble" height="500" width="400">
+        </div>
+
+        <!-- Right section for title and button -->
+        <div class="right-section">
+            <h1 class="main-title">ChatHaven</h1>
+            <button id="startChattingBtn" class="start-button">Start chatting</button>
+        </div>
+    </div>
+
+    <!-- Bottom bar for consistency with other pages -->
+    <footer class="bottom-bar">
+        <a href="about.html">About Us</a>
+    </footer>
+
+    <script>
+        // Button click handler
+        document.getElementById('startChattingBtn').addEventListener('click', function () {
+            window.location.href = '/register';
+        });
+    </script>
+</body>
+
+</html>
