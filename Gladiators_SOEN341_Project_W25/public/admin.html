@@ -78,6 +78,20 @@
             <div id="channel-result" class="result-message"></div>
         </div>
 
+        <!-- Create Default Channel Section (NEW) -->
+        <div class="admin-section">
+            <h2>Create Default Channel</h2>
+            <p class="section-description">Default channels are accessible to all users regardless of their team.</p>
+            <form id="createDefaultChannelForm">
+                <div>
+                    <label for="defaultChannelName">Channel Name:</label>
+                    <input type="text" id="defaultChannelName" placeholder="Enter default channel name" required>
+                </div>
+                <button type="submit">Create Default Channel</button>
+            </form>
+            <div id="default-channel-result" class="result-message"></div>
+        </div>
+
         <!-- View Teams Section -->
         <div class="admin-section">
             <h2>Teams</h2>
@@ -91,6 +105,15 @@
             <h2>Channels</h2>
             <ul id="adminChannelList">
                 <!-- Channels will be populated dynamically -->
+            </ul>
+        </div>
+
+        <!-- View Default Channels Section (NEW) -->
+        <div class="admin-section">
+            <h2>Default Channels</h2>
+            <ul id="defaultChannelsList">
+                <!-- Default channels will be populated dynamically -->
+                <li>Loading default channels...</li>
             </ul>
         </div>
     </div>

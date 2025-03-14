@@ -1,4 +1,4 @@
-// server.js with admin-only delete functionality
+// server.js with homepage as the first page to load
 const express = require("express");
 const mongoose = require("mongoose");
 const http = require("http");
@@ -6,11 +6,12 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO integration - FIXED: Move socket.io setup before routes
+// Socket.IO integration 
 const io = require("socket.io")(server, {
     cors: {
         origin: "*",
@@ -19,7 +20,6 @@ const io = require("socket.io")(server, {
 });
 
 // Configure middleware
-app.use(express.static("public"));
 app.use(express.json());
 app.use(cors());
 
@@ -56,13 +56,22 @@ const Team = mongoose.model("Team", teamSchema);
 
 // Channel Schema
 const channelSchema = new mongoose.Schema({
-    name: { type: String, required: true }, // Name of the channel or DM
-    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", required: function () { return this.type === "channel"; } },
-    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // For team channels, this can include multiple users; for DMs, only 2 users
-    type: { type: String, enum: ["channel", "dm"], default: "channel" }, // "channel" for team channels, "dm" for direct messages
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" } // Store admin who created the channel
+    name: { type: String, required: true },
+    team: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Team",
+        required: function () {
+            return this.type === "channel" && !this.isDefault && !this.isPrivate;
+        }
+    },
+    users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    type: { type: String, enum: ["channel", "dm"], default: "channel" },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    isDefault: { type: Boolean, default: false },
+    isPrivate: { type: Boolean, default: false },
+    pendingRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    pendingInvites: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] // New field for invites
 });
-
 const Channel = mongoose.model("Channel", channelSchema);
 
 // Message Schema
@@ -71,7 +80,7 @@ const messageSchema = new mongoose.Schema({
     username: { type: String, required: true },
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    isDeleted: { type: Boolean, default: false } // Add isDeleted field for message deletion
+    isDeleted: { type: Boolean, default: false } // isDeleted field for message deletion
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -240,14 +249,50 @@ function isAdmin(req, res, next) {
     next();
 }
 
-// Routes
-
 //******************************GET Methods************************************//
 
-// 1. Home Page
+// 1. Home Page (serves homepage.html)
 app.get("/", (req, res) => {
+    console.log("Root route accessed, serving homepage.html");
+    const homepagePath = path.join(__dirname, "public", "homepage.html");
+
+    if (fs.existsSync(homepagePath)) {
+        console.log(`✅ homepage.html found at ${homepagePath}`);
+        res.sendFile(homepagePath);
+    } else {
+        console.error(`❌ ERROR: homepage.html NOT found at ${homepagePath}`);
+        res.status(404).send("Homepage not found - please make sure homepage.html exists in the public folder");
+    }
+});
+
+// 2. Registration Page (serves index.html)
+app.get("/register", (req, res) => {
+    console.log("Register route accessed, serving index.html");
     res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
+// 3. Login Page (serves login.html)
+app.get("/login", (req, res) => {
+    console.log("Login route accessed, serving login.html");
+    const loginPath = path.join(__dirname, "public", "login.html");
+
+    if (fs.existsSync(loginPath)) {
+        res.sendFile(loginPath);
+    } else {
+        console.error(`Login page not found at ${loginPath}`);
+        // Fallback to index.html if login.html doesn't exist
+        res.sendFile(path.join(__dirname, "public", "index.html"));
+    }
+});
+
+// Redirect direct access to index.html to /register route
+app.get("/index.html", (req, res) => {
+    console.log("Redirecting from direct index.html access to register route");
+    res.redirect("/register");
+});
+
+// Setup static middleware AFTER routes with index:false
+app.use(express.static("public", { index: false }));
 
 // Get all users
 app.get('/users', authenticate, async (req, res) => {
@@ -322,7 +367,7 @@ app.get("/user/teams", authenticate, async (req, res) => {
     }
 });
 
-// Get Channels for a Team
+// Get Channels for a User (including default channels)
 app.get("/channels", authenticate, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).lean();
@@ -337,7 +382,8 @@ app.get("/channels", authenticate, async (req, res) => {
         if (user.role === "admin") {
             const adminChannels = await Channel.find({
                 createdBy: user._id,
-                type: "channel"
+                type: "channel",
+                isDefault: { $ne: true } // Exclude default channels as they'll be added separately
             }).populate("team", "name").lean();
 
             channels = adminChannels;
@@ -346,11 +392,18 @@ app.get("/channels", authenticate, async (req, res) => {
         else if (user.team) {
             const teamChannels = await Channel.find({
                 team: user.team,
-                type: "channel"
+                type: "channel",
+                isDefault: { $ne: true } // Exclude default channels as they'll be added separately
             }).populate("team", "name").lean();
 
             channels = teamChannels;
         }
+
+        // For all users, get default channels
+        const defaultChannels = await Channel.find({
+            isDefault: true,
+            type: "channel"
+        }).lean();
 
         // For all users, get their DM channels
         const dmChannels = await Channel.find({
@@ -358,10 +411,21 @@ app.get("/channels", authenticate, async (req, res) => {
             type: "dm"
         }).lean();
 
-        // Combine both types of channels
-        const allChannels = [...channels, ...dmChannels];
+        // Combine all types of channels
+        const allChannels = [...channels, ...defaultChannels, ...dmChannels];
 
-        res.json(allChannels);
+        // Add team name property to default channels for consistency
+        const formattedChannels = allChannels.map(channel => {
+            if (channel.isDefault) {
+                return {
+                    ...channel,
+                    team: { name: "Default" }
+                };
+            }
+            return channel;
+        });
+
+        res.json(formattedChannels);
     } catch (err) {
         console.error("Error fetching channels:", err);
         res.status(500).json({ error: "Failed to fetch channels!" });
@@ -448,6 +512,80 @@ app.get('/messages/:channelId', authenticate, async (req, res) => {
     }
 });
 
+app.get("/channel/pending-requests/:channelId", authenticate, async (req, res) => {
+    try {
+        const { channelId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId)
+            .populate('pendingRequests', 'username');
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if requester is the channel creator
+        if (channel.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({ error: "Only the channel creator can view pending requests" });
+        }
+
+        res.json(channel.pendingRequests);
+    } catch (error) {
+        console.error("Error fetching pending requests:", error);
+        res.status(500).json({ error: "Failed to fetch pending requests" });
+    }
+});
+
+// Get all channels including private ones (for navigation)
+app.get("/all-channels", authenticate, async (req, res) => {
+    try {
+        // Get all channels except DMs
+        const channels = await Channel.find({
+            type: "channel"
+        })
+            .populate("team", "name")
+            .lean();
+
+        // Mark which channels the user is a member of
+        const enhancedChannels = channels.map(channel => ({
+            ...channel,
+            isMember: channel.users.some(userId => userId.toString() === req.user.id),
+            isCreator: channel.createdBy && channel.createdBy.toString() === req.user.id,
+            hasPendingRequest: channel.pendingRequests && channel.pendingRequests.some(userId => userId.toString() === req.user.id)
+        }));
+
+        res.json(enhancedChannels);
+    } catch (error) {
+        console.error("Error fetching all channels:", error);
+        res.status(500).json({ error: "Failed to fetch channels" });
+    }
+});
+
+app.get("/all-channels-with-status", authenticate, async (req, res) => {
+    try {
+        // Get all channels except DMs
+        const channels = await Channel.find({
+            type: "channel"
+        })
+            .populate("team", "name")
+            .lean();
+
+        // Mark which channels the user is a member of, has a pending request, or has a pending invite
+        const enhancedChannels = channels.map(channel => ({
+            ...channel,
+            isMember: channel.users.some(userId => userId.toString() === req.user.id),
+            isCreator: channel.createdBy && channel.createdBy.toString() === req.user.id,
+            hasPendingRequest: channel.pendingRequests && channel.pendingRequests.some(userId => userId.toString() === req.user.id),
+            hasPendingInvite: channel.pendingInvites && channel.pendingInvites.some(userId => userId.toString() === req.user.id)
+        }));
+
+        res.json(enhancedChannels);
+    } catch (error) {
+        console.error("Error fetching all channels with status:", error);
+        res.status(500).json({ error: "Failed to fetch channels" });
+    }
+});
+
 //******************************POST Methods************************************//
 
 // 1. Register a New User
@@ -488,7 +626,8 @@ app.post("/login", async (req, res) => {
         message: "Login successful!",
         token,
         role: user.role,
-        username: user.username // Include username in the response
+        username: user.username,
+        userId: user._id.toString() // Explicitly include userId in the response
     });
 });
 
@@ -597,12 +736,412 @@ app.post("/admin/channel", authenticate, isAdmin, async (req, res) => {
     }
 });
 
+app.post("/admin/default-channel", authenticate, isAdmin, async (req, res) => {
+    console.log("📥 Received Default Channel Creation Request:", req.body);
+
+    const { name } = req.body;
+
+    if (!name) {
+        console.log("❌ Bad Request: Missing required field name.");
+        return res.status(400).json({ error: "Channel name is required!" });
+    }
+
+    try {
+        console.log(`🔎 Checking if default channel '${name}' already exists...`);
+        const existingChannel = await Channel.findOne({ name, isDefault: true }).lean();
+
+        if (existingChannel) {
+            console.log(`❌ Default channel '${name}' already exists!`);
+            return res.status(400).json({ error: `Default channel '${name}' already exists!` });
+        }
+
+        console.log(`✅ Creating new default channel '${name}'...`);
+
+        // Create the default channel
+        const channel = new Channel({
+            name,
+            type: "channel",
+            isDefault: true,
+            createdBy: req.user.id
+        });
+
+        await channel.save();
+
+        console.log(`✅ Default channel '${name}' created successfully!`);
+        res.status(201).json({ message: `✅ Default channel '${name}' created successfully!` });
+
+    } catch (err) {
+        console.error("❌ Error creating default channel:", err);
+        res.status(500).json({ error: "Failed to create default channel!" });
+    }
+});
+
+
+// 1. Create a private channel (for regular users)
+// Update the private channel creation endpoint
+app.post("/user/private-channel", authenticate, async (req, res) => {
+    console.log("📥 Received Private Channel Creation Request:", req.body);
+    console.log("👤 User making the request:", req.user);
+
+    const { name, invitedUsers } = req.body;
+
+    if (!name) {
+        console.log("❌ Bad Request: Missing required field name.");
+        return res.status(400).json({ error: "Channel name is required!" });
+    }
+
+    try {
+        // Check if channel with same name exists
+        const existingChannel = await Channel.findOne({
+            name,
+            $or: [
+                { createdBy: req.user.id },
+                { users: req.user.id }
+            ]
+        });
+
+        if (existingChannel) {
+            console.log(`❌ Channel '${name}' already exists!`);
+            return res.status(400).json({ error: `Channel '${name}' already exists!` });
+        }
+
+        // Initialize user IDs with the creator only
+        let userIds = [req.user.id];
+        console.log(`👥 Adding creator ID to channel: ${req.user.id}`);
+
+        // Initialize pending invites array
+        let pendingInvites = [];
+
+        // Process invited users - add them to pendingInvites instead of users
+        if (invitedUsers && invitedUsers.length > 0) {
+            console.log(`👥 Processing invited users for invites: ${invitedUsers}`);
+            const invitedUserDocs = await User.find({ username: { $in: invitedUsers } });
+
+            if (invitedUserDocs.length > 0) {
+                pendingInvites = invitedUserDocs.map(user => user._id);
+                console.log(`✅ Added ${invitedUserDocs.length} users to pending invites`);
+            } else {
+                console.log(`⚠️ No matching users found for usernames: ${invitedUsers}`);
+            }
+        }
+
+        // Create the private channel - Add team if user has one
+        const channelData = {
+            name,
+            users: userIds,
+            type: "channel",
+            createdBy: req.user.id,
+            isPrivate: true,
+            pendingRequests: [],
+            pendingInvites: pendingInvites  // Add the new field for invites
+        };
+
+        // Add team field if user has a team
+        if (req.user.team) {
+            channelData.team = req.user.team;
+        }
+
+        const channel = new Channel(channelData);
+        await channel.save();
+
+        console.log(`✅ Private channel '${name}' created successfully with ID: ${channel._id}`);
+        res.status(201).json({ message: `✅ Private channel '${name}' created successfully!` });
+    } catch (err) {
+        console.error("❌ Error creating private channel:", err);
+        res.status(500).json({ error: "Failed to create private channel!" });
+    }
+});
+
+app.post("/channel/accept-invite/:channelId", authenticate, async (req, res) => {
+    try {
+        const { channelId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if user has a pending invitation
+        if (!channel.pendingInvites || !channel.pendingInvites.includes(req.user.id)) {
+            return res.status(400).json({ error: "You don't have an invitation for this channel" });
+        }
+
+        // Remove from pending invites and add to users
+        channel.pendingInvites = channel.pendingInvites.filter(id => id.toString() !== req.user.id);
+        channel.users.push(req.user.id);
+        await channel.save();
+
+        res.json({ message: "You've joined the channel successfully" });
+    } catch (error) {
+        console.error("Error accepting channel invitation:", error);
+        res.status(500).json({ error: "Failed to accept invitation" });
+    }
+});
+
+// Add endpoint to decline an invitation
+app.post("/channel/decline-invite/:channelId", authenticate, async (req, res) => {
+    try {
+        const { channelId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if user has a pending invitation
+        if (!channel.pendingInvites || !channel.pendingInvites.includes(req.user.id)) {
+            return res.status(400).json({ error: "You don't have an invitation for this channel" });
+        }
+
+        // Remove from pending invites
+        channel.pendingInvites = channel.pendingInvites.filter(id => id.toString() !== req.user.id);
+        await channel.save();
+
+        res.json({ message: "Invitation declined" });
+    } catch (error) {
+        console.error("Error declining channel invitation:", error);
+        res.status(500).json({ error: "Failed to decline invitation" });
+    }
+});
+
+// 2. Request to join a private channel
+app.post("/channel/request-join/:channelId", authenticate, async (req, res) => {
+    try {
+        const { channelId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        if (!channel.isPrivate) {
+            return res.status(400).json({ error: "This is not a private channel" });
+        }
+
+        // Check if user is already in the channel
+        if (channel.users.includes(req.user.id)) {
+            return res.status(400).json({ error: "You are already a member of this channel" });
+        }
+
+        // Check if user already has a pending request
+        if (channel.pendingRequests.includes(req.user.id)) {
+            return res.status(400).json({ error: "You already have a pending request to join this channel" });
+        }
+
+        // Add user to pending requests
+        channel.pendingRequests.push(req.user.id);
+        await channel.save();
+
+        res.json({ message: "Join request sent successfully" });
+    } catch (error) {
+        console.error("Error requesting to join channel:", error);
+        res.status(500).json({ error: "Failed to send join request" });
+    }
+});
+
+// 3. Accept a join request (channel creator only)
+app.post("/channel/accept-request/:channelId/:userId", authenticate, async (req, res) => {
+    try {
+        const { channelId, userId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if requester is the channel creator
+        if (channel.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({ error: "Only the channel creator can accept join requests" });
+        }
+
+        // Check if user is in pending requests
+        if (!channel.pendingRequests.includes(userId)) {
+            return res.status(400).json({ error: "No pending request found for this user" });
+        }
+
+        // Add user to channel members and remove from pending requests
+        channel.users.push(userId);
+        channel.pendingRequests = channel.pendingRequests.filter(id => id.toString() !== userId);
+        await channel.save();
+
+        res.json({ message: "User added to channel successfully" });
+    } catch (error) {
+        console.error("Error accepting join request:", error);
+        res.status(500).json({ error: "Failed to accept join request" });
+    }
+});
+
+// 4. Reject a join request (channel creator only)
+app.post("/channel/reject-request/:channelId/:userId", authenticate, async (req, res) => {
+    try {
+        const { channelId, userId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if requester is the channel creator
+        if (channel.createdBy.toString() !== req.user.id) {
+            return res.status(403).json({ error: "Only the channel creator can reject join requests" });
+        }
+
+        // Remove user from pending requests
+        channel.pendingRequests = channel.pendingRequests.filter(id => id.toString() !== userId);
+        await channel.save();
+
+        res.json({ message: "Join request rejected successfully" });
+    } catch (error) {
+        console.error("Error rejecting join request:", error);
+        res.status(500).json({ error: "Failed to reject join request" });
+    }
+});
+
+// 5. Invite a user to a private channel (channel members only)
+app.post("/channel/invite/:channelId", authenticate, async (req, res) => {
+    try {
+        const { channelId } = req.params;
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).json({ error: "Username is required" });
+        }
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if requester is a channel member
+        if (!channel.users.includes(req.user.id)) {
+            return res.status(403).json({ error: "Only channel members can invite users" });
+        }
+
+        // Find the user to invite
+        const userToInvite = await User.findOne({ username });
+
+        if (!userToInvite) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Check if user is already in the channel
+        if (channel.users.includes(userToInvite._id)) {
+            return res.status(400).json({ error: "User is already a member of this channel" });
+        }
+
+        // Check if user is already invited
+        if (channel.pendingInvites && channel.pendingInvites.includes(userToInvite._id)) {
+            return res.status(400).json({ error: "User already has a pending invitation" });
+        }
+
+        // Add user to pending invites instead of directly to users
+        if (!channel.pendingInvites) {
+            channel.pendingInvites = [];
+        }
+
+        channel.pendingInvites.push(userToInvite._id);
+        await channel.save();
+
+        res.json({ message: `Invitation sent to ${username} successfully` });
+    } catch (error) {
+        console.error("Error inviting user to channel:", error);
+        res.status(500).json({ error: "Failed to invite user" });
+    }
+});
+
+// 6. Leave a channel
+app.post("/channel/leave/:channelId", authenticate, async (req, res) => {
+    try {
+        const { channelId } = req.params;
+
+        // Find the channel
+        const channel = await Channel.findById(channelId);
+
+        if (!channel) {
+            return res.status(404).json({ error: "Channel not found" });
+        }
+
+        // Check if user is a channel member
+        if (!channel.users.includes(req.user.id)) {
+            return res.status(400).json({ error: "You are not a member of this channel" });
+        }
+
+        // Cannot leave if you're the creator
+        if (channel.createdBy.toString() === req.user.id) {
+            return res.status(400).json({ error: "Channel creator cannot leave the channel" });
+        }
+
+        // Remove user from channel members
+        channel.users = channel.users.filter(id => id.toString() !== req.user.id);
+        await channel.save();
+
+        res.json({ message: "You have left the channel successfully" });
+    } catch (error) {
+        console.error("Error leaving channel:", error);
+        res.status(500).json({ error: "Failed to leave channel" });
+    }
+});
+
+// Catch-all 404 route handler - place at the end
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" }); // Error 404 Page
 });
 
+// Initialize default channels if they don't exist
+async function initializeDefaultChannels() {
+    try {
+        // Find an admin user
+        const adminUser = await User.findOne({ role: "admin" });
+
+        if (!adminUser) {
+            console.log("⚠️ No admin user found to create default channels");
+            return;
+        }
+
+        // Define default channels
+        const defaultChannelNames = ["all-general", "all-announcements", "all-help"];
+
+        for (const channelName of defaultChannelNames) {
+            // Check if the default channel already exists
+            const existingChannel = await Channel.findOne({ name: channelName, isDefault: true });
+
+            if (!existingChannel) {
+                // Create default channel
+                const defaultChannel = new Channel({
+                    name: channelName,
+                    type: "channel",
+                    isDefault: true,
+                    createdBy: adminUser._id
+                });
+
+                await defaultChannel.save();
+                console.log(`✅ Created default channel: ${channelName}`);
+            }
+        }
+
+        console.log("✅ Default channels initialized");
+    } catch (error) {
+        console.error("❌ Error initializing default channels:", error);
+    }
+}
+
 // Start the Server
 const PORT = process.env.PORT || 5000;
+
 server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+    // Initialize default channels when server starts
+    initializeDefaultChannels();
 });

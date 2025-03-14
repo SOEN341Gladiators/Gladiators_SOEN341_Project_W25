@@ -368,6 +368,91 @@ body {
   background-color: #5b6eae;
 }
 
+/* Private Channel Section */
+.create-private-channel-section {
+  margin-bottom: 16px;
+  margin-top: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.private-channel-title {
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.private-channel-title:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.private-channel-title .add-icon {
+  font-size: 1.2rem;
+  color: #fff;
+}
+
+#privateChannelForm {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+#privateChannelForm input,
+#privateChannelForm textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+#privateChannelForm textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+#privateChannelForm input::placeholder,
+#privateChannelForm textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.private-channels-section {
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.private-channels-title {
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+#privateChannelsList {
+  padding: 5px 0;
+}
+
 /* Add Friend Section */
 .add-friend-section {
   margin-bottom: 16px;
@@ -799,4 +884,317 @@ body {
   margin: 8px auto;
   border-radius: 16px;
   max-width: 70%;
+}
+
+/* Default channels section styling */
+.default-channels-section {
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.default-channels-title {
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+/* Style for default channel buttons */
+.channel-button.default-channel {
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #ffcc00;
+  /* Yellow indicator for default channels */
+}
+
+.channel-button.default-channel:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Active default channel */
+.channel-button.default-channel.active {
+  background-color: var(--active-color);
+  border-left: 3px solid #ffcc00;
+  color: white;
+  font-weight: 600;
+}
+
+/* Private channels section styling */
+.private-channels-section {
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.private-channels-title {
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+/* Style for private channel buttons */
+.channel-button.private-channel {
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #ff9800;
+  /* Orange indicator for private channels */
+}
+
+.channel-button.private-channel:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Locked private channel (user is not a member) */
+.channel-button.private-channel.locked {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: help;
+}
+
+.channel-button.private-channel.locked:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Request join badge */
+.request-join-badge {
+  font-size: 0.7rem;
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+/* Active private channel */
+.channel-button.private-channel.active {
+  background-color: var(--active-color);
+  border-left: 3px solid #ff9800;
+  color: white;
+  font-weight: 600;
+}
+
+/* Create Channel button in the sidebar */
+.create-channel-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  transition: background-color 0.2s;
+}
+
+.create-channel-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.create-channel-icon {
+  font-size: 1.1rem;
+}
+
+/* Private Channels Styling */
+.private-channels {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  color: white;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Style for private channel buttons */
+.private-channel {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  margin-bottom: 2px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-left: 3px solid #ff9800;
+  /* Orange indicator */
+  color: white;
+  cursor: pointer;
+}
+
+.private-channel.locked {
+  opacity: 0.7;
+  border-left-color: #aaa;
+}
+
+
+/* Styles for the private channel link */
+.private-channel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white !important;
+  text-decoration: none !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+a.private-channel-title:hover {
+  background: rgba(255, 255, 255, 0.15);
+  text-decoration: none !important;
+  color: white !important;
+}
+
+.create-private-channel-section {
+  margin-bottom: 16px;
+  margin-top: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+
+
+/* Add these styles to your nav_bar.css file */
+
+/* Status badges for private channels */
+.invitation-badge {
+  font-size: 0.7rem;
+  background-color: rgba(46, 204, 113, 0.2);
+  /* Green background */
+  color: #2ecc71;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.pending-badge {
+  font-size: 0.7rem;
+  background-color: rgba(241, 196, 15, 0.2);
+  /* Yellow background */
+  color: #f1c40f;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+.request-join-badge {
+  font-size: 0.7rem;
+  background-color: rgba(255, 152, 0, 0.2);
+  /* Orange background */
+  color: #ff9800;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+
+/* Enhanced styles for private channels */
+.channel-button.private-channel {
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #ff9800;
+  /* Orange indicator for private channels */
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.channel-button.private-channel:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(2px);
+}
+
+/* Channel with pending invitation */
+.channel-button.private-channel:has(.invitation-badge) {
+  border-left: 3px solid #2ecc71;
+  /* Green indicator for invitation */
+  background: rgba(46, 204, 113, 0.08);
+}
+
+.channel-button.private-channel:has(.invitation-badge):hover {
+  background: rgba(46, 204, 113, 0.15);
+}
+
+/* Channel with pending request */
+.channel-button.private-channel:has(.pending-badge) {
+  border-left: 3px solid #f1c40f;
+  /* Yellow indicator for pending */
+  background: rgba(241, 196, 15, 0.08);
+}
+
+.channel-button.private-channel:has(.pending-badge):hover {
+  background: rgba(241, 196, 15, 0.15);
+}
+
+/* Locked private channel (user is not a member) */
+.channel-button.private-channel.locked {
+  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  /* Changed from help to pointer since they can request access */
+}
+
+.channel-button.private-channel.locked:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Channel header for private channels section */
+.private-channels-title {
+  position: relative;
+  padding-right: 30px;
+  /* Space for the count bubble */
+}
+
+/* Count bubble for private channels */
+.private-channels-count {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 0.7rem;
+  border-radius: 10px;
+  padding: 1px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Update private channel link styles */
+a.private-channel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white !important;
+  text-decoration: none !important;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+a.private-channel-title:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }

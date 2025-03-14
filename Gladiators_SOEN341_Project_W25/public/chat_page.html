@@ -8,47 +8,176 @@
     <link rel="stylesheet" href="style_ChatPage.css">
     <link rel="stylesheet" href="nav_bar.css">
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+        /* Make sure chat header has the right style */
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #6b7dff;
+            color: white;
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .chat-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .view-requests-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .leave-channel-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .leave-channel-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Styling for the requests panel */
+        .requests-panel {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 60px;
+            width: 280px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .requests-panel-header {
+            padding: 12px 16px;
+            background-color: #6b7dff;
+            color: white;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .requests-panel-header .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .requests-panel-content {
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .no-requests-message {
+            text-align: center;
+            padding: 12px;
+            color: #777;
+            font-style: italic;
+        }
+
+        .join-request-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .join-request-item:last-child {
+            border-bottom: none;
+        }
+
+        .request-username {
+            font-weight: 500;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .accept-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .reject-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
     <!-- Include the navigation bar from nav_bar.html -->
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            <span>ChatHaven</span>
-        </div>
+        <div class="sidebar-logo">ChatHaven</div>
+
         <form class="search-form">
-            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
-                aria-label="Search channels">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels...">
         </form>
-        <div class="add-channel-section">
-            <div class="add-channel-title">
-                <span class="add-icon">➕</span> Create Channel 🆕
-            </div>
-            <form id="addChannelForm" style="display: none;">
-                <input type="text" id="newChannelName" placeholder="Channel name" required>
-                <button type="submit" class="create-channel-btn">Create</button>
-            </form>
+
+        <!-- ✅ Default Channels Section -->
+        <div class="default-channels-section">
+            <div class="default-channels-title">📢 Default Channels</div>
+            <div id="defaultChannelsList"></div>
         </div>
-        <div class="add-friend-section">
-            <div class="add-friend-title">
-                <span class="add-icon">➕</span> Add friend 🫂
-            </div>
-            <form id="addFriendForm" style="display: none;">
-                <input type="text" id="newFriendName" placeholder="Friend name" required>
-                <button type="submit" class="add-friend-btn">Add</button>
-            </form>
+
+        <div class="private-channels-section">
+            <div class="private-channels-title">🔒 Private Channels</div>
+            <div id="privateChannelsList"></div>
         </div>
+
         <div class="favorites-section">
-            <div class="favorites-title">Favorite channels ⭐</div>
-            <div class="favorites-list" id="favoritesList"></div>
+            <div class="favorites-title">⭐ Favorite Channels</div>
+            <div id="favoritesList"></div>
         </div>
+
         <div class="recent-section">
-            <div class="recent-title">Recent channels 🕒</div>
-            <div class="recent-list" id="recentList"></div>
+            <div class="recent-title">🕒 Recent Channels</div>
+            <div id="recentList"></div>
         </div>
+
         <div class="channel-list" id="channelList">
             <div class="no-channels" id="noChannels">No channels found</div>
         </div>
+
+        <!-- Dropdown menu for available users -->
         <div class="dropdown-menu">
             <div class="dropdown-title">Available ❇️</div>
             <div class="dropdown-list" id="usersList"></div>
@@ -57,34 +186,45 @@
 
     <button id="sidebarToggle" class="sidebar-toggle">⬅️</button>
 
-    <!-- Main Chat Area -->
     <div class="dashboard-container" id="dashboardContainer">
         <h1 class="channel-title" id="channelTitle"></h1>
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
             <span class="theme-toggle-icon">🌓</span>
             <span class="theme-toggle-text">Toggle theme</span>
         </button>
-
         <p class="welcome-text" id="welcomeText">Welcome to ChatHaven!</p>
         <p class="start-conversation-text" id="startConversationText">Select a channel or friend to start chatting.</p>
 
-        <div class="chat-area" id="chatArea">
-            <button class="close-chat-btn" onclick="closeChat()">Close Chat</button>
+        <div class="chat-area" id="chatArea" style="display: none;">
             <div class="chat-header">
                 <h2 id="chatTitle">Channel/Recipient Name</h2>
+                <div class="chat-header-actions">
+                    <button class="view-requests-btn" id="viewRequestsBtn">View Requests</button>
+                </div>
             </div>
-            <div class="chat-messages" id="chatMessages">
-                <!-- Chat messages will appear here -->
-            </div>
+            <div class="chat-messages" id="chatMessages"></div>
             <form id="chatForm" class="chat-form">
-                <input type="text" id="chatInput" placeholder="Type your message here..." autocomplete="off">
-                <button type="button" onclick="sendMessage()">Send</button>
+                <input type="text" id="chatInput" placeholder="Type your message here...">
+                <button type="submit">Send</button>
             </form>
         </div>
     </div>
 
+    <div class="requests-panel" id="requestsPanel">
+        <div class="requests-panel-header">
+            <span>Channel Join Requests</span>
+            <button class="close-btn" id="closeRequestsPanel">×</button>
+        </div>
+        <div class="requests-panel-content" id="requestsPanelContent">
+            <div class="no-requests-message">No pending requests</div>
+        </div>
+    </div>
+
+
     <!-- Include the Socket.IO messaging and nav bar scripts -->
     <script src="messaging.js"></script>
+    <script src="channel_requests.js"></script>
+    <script src="leave_channel.js"></script>
     <script src="nav_bar.js"></script>
 </body>
 

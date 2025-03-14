@@ -28,6 +28,23 @@
             </form>
         </div>
 
+        <!-- Create Private Channel Section -->
+        <div class="create-private-channel-section">
+            <a href="create_channel.html" class="private-channel-title">
+                <span class="add-icon">➕</span> Create Private Channel 🔒
+            </a>
+        </div>
+
+        <!-- Private Channels Section -->
+        <div class="private-channels-section">
+            <div class="private-channels-title">
+                <span class="section-title">🔒 Private Channels</span>
+            </div>
+            <div id="privateChannelsList">
+                <!-- Private channels will be loaded here -->
+            </div>
+        </div>
+
         <!-- Direct Message Section -->
         <div class="dm-section">
             <div class="dm-title">
@@ -84,7 +101,6 @@
 
         <!-- Chat Area -->
         <div class="chat-area" id="chatArea" style="display: none;">
-            <button class="close-chat-btn" onclick="closeChat()">Close Chat</button>
             <div class="chat-header">
                 <h2 id="chatTitle">Channel/Recipient Name</h2>
             </div>
@@ -103,6 +119,9 @@
 
     <!-- Include the chat messaging script -->
     <script src="messaging.js"></script>
+
+    <!-- Include private channel handling script -->
+    <script src="private_channel_handler.js"></script>
 
     <!-- Include navigation bar script -->
     <script src="nav_bar.js" defer></script>
