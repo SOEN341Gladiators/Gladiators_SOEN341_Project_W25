@@ -40,6 +40,8 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true }, // Store the hashed password
     role: { type: String, default: "user" }, // "admin" or "user"
     team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null }, // The team assigned to the user
+    status: { type: String, enum: ["online", "offline", "away"], default: "offline" }, // New field
+    lastSeen: { type: Date, default: Date.now } // New field
 });
 
 const User = mongoose.model("User", userSchema);
@@ -93,35 +95,71 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     // Store user information when they connect
-    socket.on('user info', (data) => {
-        if (data.username && data.role) {
-            connectedUsers.set(socket.id, {
-                username: data.username,
-                role: data.role
-            });
-            console.log(`User ${data.username} with role ${data.role} registered`);
+    socket.on('user info', async (data) => {
+        if (data && data.username && data.role) {
+            try {
+                const user = await User.findOneAndUpdate(
+                    { username: data.username },
+                    { status: 'online', lastSeen: new Date() },
+                    { new: true }
+                );
+                if (!user) {
+                    console.log(`User ${data.username} not found in DB`);
+                    socket.emit('error', 'User not found');
+                    return;
+                }
+
+                connectedUsers.set(socket.id, {
+                    username: data.username,
+                    role: data.role,
+                    userId: user._id
+                });
+                console.log(`User ${data.username} with role ${data.role} registered`);
+
+                io.emit('userStatusUpdate', {
+                    _id: user._id,
+                    username: user.username,
+                    status: user.status,
+                    lastSeen: user.lastSeen
+                });
+
+                const users = await User.find().select('username status lastSeen').lean();
+                console.log('Emitting userList on user info:', users.length, 'users');
+                io.emit('userList', users);
+                console.log('Successfully emitted userList on user info:', users.length, 'users');
+            } catch (error) {
+                console.error('Error in user info:', error);
+                socket.emit('error', 'Failed to update user status');
+            }
+        } else {
+            console.log('Invalid user info data:', data);
         }
     });
 
-    // Handle joining a channel
+    socket.on('getUsers', async () => {
+        try {
+            const users = await User.find().select('username status lastSeen').lean();
+            console.log('Emitting userList on getUsers:', users.length, 'users', users);
+            io.emit('userList', users);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            socket.emit('error', 'Failed to fetch user list');
+        }
+    });
+
     socket.on('join channel', async (channelId) => {
         try {
-            // Leave previous channel if any
             if (socket.currentChannel) {
                 socket.leave(socket.currentChannel);
             }
-
-            // Join new channel
             socket.join(channelId);
             socket.currentChannel = channelId;
 
-            // Fetch last 50 messages for this channel
             const messages = await Message.find({ channelId })
                 .sort({ timestamp: -1 })
                 .limit(50)
                 .lean();
 
-            // Send message history to the user
             socket.emit('message history', messages.reverse());
         } catch (error) {
             console.error('Error joining channel:', error);
@@ -129,25 +167,20 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle new messages
     socket.on('message', async (data) => {
         try {
             const { channelId, username, message } = data;
-
-            // Log incoming message data
             console.log('Received message:', data);
 
-            // Save message to database
             const newMessage = new Message({
                 channelId,
                 username,
                 message,
                 timestamp: new Date(),
-                isDeleted: false // Initialize as not deleted
+                isDeleted: false
             });
             await newMessage.save();
 
-            // Broadcast message to all users in the channel
             io.to(channelId).emit('message', {
                 _id: newMessage._id,
                 username,
@@ -156,7 +189,6 @@ io.on('connection', (socket) => {
                 isDeleted: false
             });
 
-            // Log successful broadcast
             console.log('Message broadcast to channel:', channelId);
         } catch (error) {
             console.error('Error handling message:', error);
@@ -164,17 +196,14 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle message deletion (admin only)
     socket.on('delete message', async (messageId) => {
         try {
-            // Check if user is admin
             const userInfo = connectedUsers.get(socket.id);
             if (!userInfo || userInfo.role !== 'admin') {
                 socket.emit('error', 'Permission denied: Only admins can delete messages');
                 return;
             }
 
-            // Update the message in the database
             const updatedMessage = await Message.findByIdAndUpdate(
                 messageId,
                 { isDeleted: true },
@@ -186,7 +215,6 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            // Broadcast the deletion to all users in the channel
             io.to(updatedMessage.channelId.toString()).emit('message deleted', {
                 messageId: updatedMessage._id,
                 channelId: updatedMessage.channelId
@@ -199,15 +227,66 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle disconnection
-    socket.on('disconnect', () => {
-        // Remove user from connected users
-        connectedUsers.delete(socket.id);
+    socket.on('disconnect', async () => {
+        const userInfo = connectedUsers.get(socket.id);
+        if (userInfo) {
+            try {
+                const user = await User.findOneAndUpdate(
+                    { username: userInfo.username },
+                    { status: 'offline', lastSeen: new Date() },
+                    { new: true }
+                );
+                if (user) {
+                    io.emit('userStatusUpdate', {
+                        _id: user._id,
+                        username: user.username,
+                        status: user.status,
+                        lastSeen: user.lastSeen
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating user status on disconnect:', error);
+            }
+        }
 
+        connectedUsers.delete(socket.id);
         if (socket.currentChannel) {
             socket.leave(socket.currentChannel);
         }
         console.log('User disconnected:', socket.id);
+
+        const users = await User.find().select('username status lastSeen').lean();
+        console.log('Emitting userList on disconnect:', users.length, 'users');
+        io.emit('userList', users);
+    });
+
+    let awayTimeout = setTimeout(async () => {
+        const userInfo = connectedUsers.get(socket.id);
+        if (userInfo) {
+            try {
+                const user = await User.findOne({ username: userInfo.username });
+                if (user && user.status === 'online') {
+                    user.status = 'away';
+                    user.lastSeen = new Date();
+                    await user.save();
+                    io.emit('userStatusUpdate', {
+                        _id: user._id,
+                        username: user.username,
+                        status: user.status,
+                        lastSeen: user.lastSeen
+                    });
+                    const users = await User.find().select('username status lastSeen').lean();
+                    console.log('Emitting userList on away:', users.length, 'users');
+                    io.emit('userList', users);
+                }
+            } catch (error) {
+                console.error('Error setting user to away:', error);
+            }
+        }
+    }, 5 * 60 * 1000);
+
+    socket.on('disconnect', () => {
+        clearTimeout(awayTimeout);
     });
 });
 

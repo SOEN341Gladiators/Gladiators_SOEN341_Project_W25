@@ -9,22 +9,53 @@ body {
 }
 
 .admin-main {
+    position: relative; /* For absolute positioning of user-list-section */
     margin-left: 230px;
-    /* Match sidebar width */
     padding: 30px;
-    flex: 1;
-    transition: margin-left 0.3s ease;
+    width: calc(100% - 230px); /* Full width after sidebar */
     height: 100vh;
-    overflow-y: auto;
+    overflow: hidden; /* Prevent overflow outside main area */
     background: #08060120;
     /* Creamy background for admin panel */
 }
 
 .sidebar.collapsed~.admin-main {
     margin-left: 0;
+    width: 100%; /* Full width when sidebar is collapsed */
 }
 
-/* Style admin section like it was before */
+/* Wrapper for left column sections (full width minus right column) */
+.admin-sections-wrapper {
+    width: calc(100% - 350px); /* Full width minus user list width */
+    height: 100%;
+    overflow-y: auto; /* Scroll if content overflows */
+    padding-right: 30px; /* Space between columns */
+    box-sizing: border-box;
+    scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+/* Custom scrollbar for admin-sections-wrapper */
+.admin-sections-wrapper::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+}
+
+.admin-sections-wrapper::-webkit-scrollbar-track {
+    background: #f0f0f0; /* Light track color */
+    border-radius: 5px;
+}
+
+.admin-sections-wrapper::-webkit-scrollbar-thumb {
+    background: #5563DE; /* Matches your primary color */
+    border-radius: 5px;
+    border: 2px solid #f0f0f0; /* Adds padding effect */
+    transition: background 0.3s; /* Smooth color transition */
+}
+
+.admin-sections-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #4152c7; /* Darker shade on hover */
+}
+
+/* Style admin section */
 .admin-section {
     background-color: #fff;
     margin-bottom: 30px;
@@ -40,12 +71,12 @@ body {
     font-size: 1.5rem;
 }
 
-/* Admin header styling */
 .admin-main h1 {
     color: #5563DE;
     margin-top: 0;
     margin-bottom: 30px;
     font-size: 2rem;
+    width: 100%; /* Ensure header spans full width */
 }
 
 /* Form element styling */
@@ -57,6 +88,7 @@ body {
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    font-size: 1rem;
 }
 
 .admin-section button {
@@ -153,6 +185,131 @@ body {
 
 .btn-view:hover {
     background-color: #4152c7;
+}
+
+/* User list section (Right column, unique styling) */
+.user-list-section {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 350px; /* Fixed width for right column */
+    height: 100%; /* Full height */
+    background: linear-gradient(135deg, #1a1a1a, #2c2c2c); /* Dark gradient */
+    padding: 20px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3); /* Shadow to the left */
+    overflow-y: auto; /* Scroll if too many users */
+    border-left: 2px solid #00ffcc; /* Neon accent */
+    box-sizing: border-box;
+    scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+/* Custom scrollbar for user-list-section */
+.user-list-section::-webkit-scrollbar {
+    width: 8px; /* Slightly thinner for a sleek look */
+}
+
+.user-list-section::-webkit-scrollbar-track {
+    background: #2c2c2c; /* Matches the dark gradient */
+    border-radius: 4px;
+}
+
+.user-list-section::-webkit-scrollbar-thumb {
+    background: #00ffcc; /* Neon cyan to match the theme */
+    border-radius: 4px;
+    border: 1px solid #2c2c2c; /* Adds padding effect */
+    transition: background 0.3s; /* Smooth color transition */
+}
+
+.user-list-section::-webkit-scrollbar-thumb:hover {
+    background: #00cc99; /* Darker cyan on hover */
+}
+
+.user-list-section h2 {
+    color: #00ffcc; /* Neon cyan */
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+}
+
+.user-search {
+    margin-bottom: 20px;
+}
+
+.user-search input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #00ffcc;
+    border-radius: 5px;
+    background: #333;
+    color: #fff;
+    font-size: 1rem;
+    box-shadow: 0 0 5px rgba(0, 255, 204, 0.3);
+    transition: box-shadow 0.3s;
+}
+
+.user-search input:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+}
+
+.user-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.user-list li {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05); /* Semi-transparent white */
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    border: 1px solid #444;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-list li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+.user-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Glow effect */
+}
+
+.status-online {
+    background-color: #00ff00; /* Neon green */
+}
+
+.status-offline {
+    background-color: #ff3333; /* Neon red */
+}
+
+.status-away {
+    background-color: #ffcc00; /* Neon yellow */
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.last-seen {
+    font-size: 0.8em;
+    color: #ccc;
 }
 
 /* Loading and error states */
