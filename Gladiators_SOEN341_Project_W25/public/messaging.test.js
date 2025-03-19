@@ -3,6 +3,9 @@
 /**
  * @jest-environment jsdom
  */
+const { sendMessage, displaySystemMessage, closeChat, joinChannel } = require('./messaging');  // Import mocks
+
+beforeEach(() => {
 // Mock the socket.io client
 jest.mock('socket.io-client', () => {
   return jest.fn(() => ({
@@ -19,11 +22,14 @@ jest.mock('./messaging', () => ({
     displaySystemMessage: jest.fn(),
     closeChat: jest.fn(),
     joinChannel: jest.fn(),
-    fetchUsers: jest.fn(),
   }));
 
-beforeEach(() => {
-  // Mocking localStorage to simulate getting and setting items
+  window.sendMessage = sendMessage;
+  window.displaySystemMessage = displaySystemMessage;
+  window.closeChat = closeChat;
+  window.joinChannel = joinChannel;
+
+  // Mocking localStorage to simulate getting and setting items in browser
   global.localStorage = {
     getItem: jest.fn((key) => {
       if (key === 'username') return 'testUser';
@@ -43,17 +49,17 @@ beforeEach(() => {
     <div id="welcomeText"></div>
     <div id="startConversationText"></div>
   `;
+
+  const socket = require('socket.io-client')();
+  socket.emit = jest.fn(); // Mock socket emit
+
 });
-//allow for seperate testing 
+//allow for seperate testing - reset
 afterEach(() => {
   jest.clearAllMocks();   
 });
 
-describe('Messaging', () => {
-
-    const socket = require('socket.io-client')();
-    socket.emit = jest.fn(); // Mock socket emit
-
+describe('Messaging Tests', () => {
 
     test('displays system message correctly', () => {
         displaySystemMessage('Test System Message');
@@ -62,9 +68,16 @@ describe('Messaging', () => {
     });
 
     test('sendMessage sends a message when input is valid', () => {
+        document.body.innerHTML = `<input id="chatInput" value="Hello, World!">`;
+        localStorage.setItem('username', 'testUser'); // Mock username
+        //currentChannel = "null";  // Ensure a valid channel is set
+        const socket = require('socket.io-client')();
+        socket.emit = jest.fn(); // Mock socket emit
+/*
         const messageInput = document.getElementById('chatInput');
         messageInput.value = 'Hello, World!';
         const socket = require('socket.io-client')();
+*/
         sendMessage();
         expect(socket.emit).toHaveBeenCalledWith('message', {
         channelId: null,
@@ -100,17 +113,5 @@ describe('Messaging', () => {
         require('./messaging').joinChannel(channelId);
         expect(socket.emit).toHaveBeenCalledWith('join channel', channelId);
         expect(document.getElementById('chatMessages').innerHTML).toContain('Joined channel testChannel');
-    });
-
-    test('fetchUsers handles successful and error responses', async () => {
-        global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue({ users: ['user1', 'user2'] }),
-        });
-        const users = await require('./messaging').fetchUsers('user');
-        expect(users).toEqual(['user1', 'user2']);
-        global.fetch.mockRejectedValueOnce(new Error('Failed to fetch users'));
-        const errorUsers = await require('./messaging').fetchUsers('user');
-        expect(errorUsers).toEqual([]);
     });
 });

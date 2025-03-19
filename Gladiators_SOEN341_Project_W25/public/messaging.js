@@ -377,7 +377,7 @@ if (typeof window !== "undefined") {    // Allow for testing and more robustness
   }
   
 
-/*
+
 // Export functions for testing
 module.exports = {
     displaySystemMessage,
@@ -386,4 +386,3 @@ module.exports = {
     joinChannel,
     fetchUsers
   };
-*/
