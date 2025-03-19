@@ -1,13 +1,14 @@
 // Initialize global variables
 let socket;
 let currentChannel = null;
-let username = localStorage.getItem('username') || 'Anonymous';
-let userRole = localStorage.getItem('userRole') || 'user';
+let username = typeof localStorage !== 'undefined' ? localStorage.getItem('username') || 'Anonymous' : 'Anonymous'; //allow for testing
+let userRole = typeof localStorage !== 'undefined' ? localStorage.getItem('userRole') || 'user' : 'user';
 
+//if (typeof document !== "undefined") {
 document.addEventListener("DOMContentLoaded", function () {
     // Ensure username is set properly at initialization
-    username = localStorage.getItem('username') || 'Anonymous';
-    userRole = localStorage.getItem('userRole') || 'user';
+    username = typeof localStorage !== 'undefined' ? localStorage.getItem('username') || 'Anonymous' : 'Anonymous';
+    userRole = typeof localStorage !== 'undefined' ? localStorage.getItem('userRole') || 'user' : 'user';
     console.log("Current username:", username);
     console.log("Current user role:", userRole);
 
@@ -139,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+//};
 
 // Helper functions
 function displayMessage(data) {
@@ -364,8 +366,24 @@ function closeChat() {
 }
 
 // Export functions for use in other files
-window.joinChannel = joinChannel;
-window.joinDM = joinDM;
-window.displaySystemMessage = displaySystemMessage;
-window.closeChat = closeChat;
-window.sendMessage = sendMessage; // Export for use in standalone buttons
+// Export functions for testing
+if (typeof window !== "undefined") {    // Allow for testing and more robustness 
+    window.displaySystemMessage = displaySystemMessage;
+    window.sendMessage = sendMessage; 
+    window.closeChat = closeChat;
+    window.joinChannel = joinChannel;
+    window.joinDM = joinDM;
+    window.socket = socket; // Expose socket for testing purposes
+  }
+  
+
+/*
+// Export functions for testing
+module.exports = {
+    displaySystemMessage,
+    sendMessage,
+    closeChat,
+    joinChannel,
+    fetchUsers
+  };
+*/
