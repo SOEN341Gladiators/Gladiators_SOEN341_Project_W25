@@ -1,188 +1,81 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-
-*{
-    margin: o;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Poppins", sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
-
-  
- 
 
 /* Apply basic styling to the entire page */
 body {
-    /*font-family: Arial, sans-serif ;*/
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    /* Stack elements vertically */
-    align-items: center;
-    height: 100vh;
-
-   background: linear-gradient(135deg, rgb(30, 30, 30), rgb(60, 60, 60)); 
-
-
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background: #2a2a2a;
+  /* Matches admin background */
+  padding-top: 80px;
+  /* Space for top bar */
+  padding-bottom: 40px;
+  /* Space for bottom bar */
 }
 
 .container button {
-    width: 200px;
-    padding: 14px;
-    font-size: 18px;
+  width: 200px;
+  padding: 14px;
+  font-size: 18px;
 }
-
 
 /* Style the login container */
 .login-container {
-    background: linear-gradient(135deg, rgb(30, 30, 30), rgb(60, 60, 60)); 
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
-    color: #fff;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
+  background: linear-gradient(135deg, rgb(30, 30, 30), rgb(60, 60, 60));
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
+  color: #fff;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
-
 
 /* Style input fields */
 input {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 /* Style the submit button */
 button {
-    
-    width: 100%;
-    padding: 10px;
-    background-color: #5563DE;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    
-
+  width: 100%;
+  padding: 10px;
+  background-color: #5563DE;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 /* Change button color on hover */
 button:hover {
-    background-color: lightblue;
+  background-color: lightblue;
 }
 
 /* Style error messages */
 .error-message {
-    color: red;
-    font-size: 14px;
-    display: none;
-    /* Hidden by default */
+  color: red;
+  font-size: 14px;
+  display: none;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    padding: 20px;
-}
-
-input,
-select,
-button {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    background-color: #5563DE;
-    /* Green color */
-    color: white;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: rgb(44, 79, 161);
-}
-
-#teamsList {
-    margin-top: 30px;
-}
-
-#teamList {
-    list-style-type: none;
-    padding: 0;
-}
-
-#teamList li {
-    background-color: #e9ecef;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-/*new*/
-
-/* NEW: Top Bar Styles */
-.top-bar {
-    width: 100%;
-    background-color: #5563DE;  /* Matches your primary theme color */
-    padding: 10px 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    text-align: center;
-    color: white;
-    z-index: 100;
-}
-
-.top-bar h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
-/* NEW: Bottom Bar Styles */
-.bottom-bar {
-    width: 100%;
-    background-color:#5563DE;  /* Light footer background */
-    padding: 8px 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    text-align: center;
-}
-
-.bottom-bar a {
-    color: #ffff;
-    text-decoration: none;
-    font-size: 14px;
-}
-
-.bottom-bar a:hover {
-    text-decoration: underline;
-}
-
-/* NEW: Adjust body padding to account for fixed top and bottom bars */
-body {
-    padding-top: 80px;    /* Space for top bar */
-    padding-bottom: 40px; /* Space for bottom bar */
-}
-
-.account-text {
-    color: #fff;
-}
-
-/* NEW for the members page, i didnt wanna merge it i was scared */
-
-/* --- Top Bar Styles --- */
+/* Top Bar Styles */
 .top-bar {
   width: 100%;
   background-color: #5563DE;
@@ -204,41 +97,47 @@ body {
 
 /* Logout button in top bar */
 .logout-btn {
-    background-color: #e74c3c;  /* Red background */
-  border: none;               /* No border */
-  color: #fff;                /* White text */
-  font-size: bold, 16px;            /* Small text size */
-  width: 60px;                /* Fixed width for a small square */
-  height: 40px;               /* Fixed height for a small square */
-  border-top-left-radius: 10%;  
-    border-top-right-radius: 10%;
-    border-bottom-right-radius: 10%;
-    border-bottom-left-radius: 10%;
-  display: flex;              /* Center content horizontally and vertically */
+  background-color: #e74c3c;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  width: 60px;
+  height: 40px;
+  border-radius: 10%;
+  display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   transition: background-color 0.3s;
-  
-  }
-  
+}
 
 .logout-btn:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-/* --- Dashboard Container --- */
-.dashboard-container {
+/* Main Container for 70-30 Split */
+.main-container {
   width: 90%;
-  max-width: 800px;
-  margin: 100px auto 60px; /* Top margin to account for the top bar, bottom margin for the bottom bar */
+  max-width: 1200px;
+  margin: 100px auto 60px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  /* Columns only as tall as their content */
+}
+
+/* Left Column (70%) */
+.dashboard-container {
+  width: 70%;
   padding: 20px;
   background: linear-gradient(135deg, rgb(240, 234, 214), rgb(225, 218, 203));
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Section Styles --- */
+/* Section Styles (Left Column) */
 .dashboard-container section {
   margin-bottom: 30px;
   padding: 10px;
@@ -251,7 +150,7 @@ body {
   color: #333;
 }
 
-/* --- Lists Styling --- */
+/* Lists Styling (Left Column) */
 #userTeams,
 #userChannels {
   list-style: none;
@@ -264,9 +163,11 @@ body {
   margin-bottom: 8px;
   padding: 10px;
   border-radius: 5px;
+  display: flex;
+  align-items: center;
 }
 
-/* --- Chat Button --- */
+/* Chat Button */
 .open-chat {
   background-color: #5563DE;
   color: #fff;
@@ -282,9 +183,238 @@ body {
   background-color: rgb(44, 79, 161);
 }
 
-/* --- Adjust Body Padding for Fixed Bars --- */
-body {
-  padding-top: 80px;    /* Space for top bar */
-  padding-bottom: 40px; /* Space for bottom bar */
+/* Right Column (30%) - Registered Users (Matches Admin) */
+.user-list-section {
+  width: 30%;
+  background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+  /* Dark gradient from admin */
+  padding: 20px;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+  /* Shadow to the left */
+  overflow-y: auto;
+  /* Scroll if too many users */
+  border-left: 2px solid #00ffcc;
+  /* Neon accent */
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  /* Smooth scrolling */
 }
 
+/* Custom scrollbar for user-list-section */
+.user-list-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.user-list-section::-webkit-scrollbar-track {
+  background: #2c2c2c;
+  /* Matches the dark gradient */
+  border-radius: 4px;
+}
+
+.user-list-section::-webkit-scrollbar-thumb {
+  background: #00ffcc;
+  /* Neon cyan */
+  border-radius: 4px;
+  border: 1px solid #2c2c2c;
+  /* Adds padding effect */
+  transition: background 0.3s;
+  /* Smooth color transition */
+}
+
+.user-list-section::-webkit-scrollbar-thumb:hover {
+  background: #00cc99;
+  /* Darker cyan on hover */
+}
+
+.user-list-section h2 {
+  color: #00ffcc;
+  /* Neon cyan from admin */
+  font-size: 1.8rem;
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+}
+
+.user-search {
+  margin-bottom: 20px;
+}
+
+.user-search input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #00ffcc;
+  border-radius: 5px;
+  background: #333;
+  color: #fff;
+  font-size: 1rem;
+  box-shadow: 0 0 5px rgba(0, 255, 204, 0.3);
+  transition: box-shadow 0.3s;
+}
+
+.user-search input:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.7);
+}
+
+.user-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.user-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  /* Semi-transparent white from admin */
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  border: 1px solid #444;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-list li:hover {
+  transform: translateX(5px);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+.user-menu {
+  position: relative;
+  margin-left: 10px;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #fff;
+  /* Matches admin text */
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.menu-btn:hover {
+  color: #00ffcc;
+  /* Neon cyan for hover, matches admin theme */
+}
+
+.menu-dropdown {
+  display: none;
+  /* Hidden by default */
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: #2c2c2c;
+  /* Matches admin gradient */
+  border: 1px solid #444;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.menu-dropdown button {
+  display: block;
+  width: 100px;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-dropdown button:hover {
+  background: #00ffcc;
+  color: #1a1a1a;
+}
+
+.user-list li:hover .menu-dropdown {
+  display: none;
+  /* Show dropdown on hover or click */
+}
+
+.user-status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 10px;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  /* Glow effect from admin */
+}
+
+.status-online {
+  background-color: #00ff00;
+  /* Neon green from admin */
+}
+
+.status-offline {
+  background-color: #ff3333;
+  /* Neon red from admin */
+}
+
+.status-away {
+  background-color: #ffcc00;
+  /* Neon yellow from admin */
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: bold;
+  color: #fff;
+  /* White text from admin */
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.last-seen {
+  font-size: 0.8em;
+  color: #ccc;
+  /* Light gray from admin */
+}
+
+/* Unrelated styles remain unchanged */
+#teamsList {
+  margin-top: 30px;
+}
+
+#teamList {
+  list-style-type: none;
+  padding: 0;
+}
+
+#teamList li {
+  background-color: #e9ecef;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.bottom-bar {
+  width: 100%;
+  background-color: #5563DE;
+  padding: 8px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+}
+
+.bottom-bar a {
+  color: #ffff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.bottom-bar a:hover {
+  text-decoration: underline;
+}
+
+.account-text {
+  color: #fff;
+}

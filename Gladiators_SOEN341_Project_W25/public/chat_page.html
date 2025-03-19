@@ -163,6 +163,12 @@
             <div id="privateChannelsList"></div>
         </div>
 
+        <!-- Create Channel Button - Link to admin or create channel page -->
+        <div class="create-channel-section">
+            <button class="create-channel-btn" id="createChannelBtn" onclick="goToCreateChannel()">➕ Create
+                Channel</button>
+        </div>
+
         <div class="favorites-section">
             <div class="favorites-title">⭐ Favorite Channels</div>
             <div id="favoritesList"></div>
@@ -200,6 +206,7 @@
                 <h2 id="chatTitle">Channel/Recipient Name</h2>
                 <div class="chat-header-actions">
                     <button class="view-requests-btn" id="viewRequestsBtn">View Requests</button>
+                    <button class="leave-channel-btn" id="leaveChannelBtn">Leave Channel</button>
                 </div>
             </div>
             <div class="chat-messages" id="chatMessages"></div>
@@ -226,6 +233,19 @@
     <script src="channel_requests.js"></script>
     <script src="leave_channel.js"></script>
     <script src="nav_bar.js"></script>
+    <script src="registered_users.js"></script> <!-- Include to maintain socket -->
+
+    <script>
+        // Function to redirect to the appropriate create channel page
+        function goToCreateChannel() {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole === 'admin') {
+                window.location.href = 'admin.html'; // Admins go to admin dashboard
+            } else {
+                window.location.href = 'create_channel.html'; // Regular users go to create channel page
+            }
+        }
+    </script>
 </body>
 
 </html>

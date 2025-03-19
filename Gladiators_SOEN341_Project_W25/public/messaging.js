@@ -26,12 +26,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const welcomeText = document.getElementById("welcomeText");
     const startConversationText = document.getElementById("startConversationText");
 
-    // Check for channel selected from another page
+    // Parse DM user from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const dmUser = urlParams.get('dm');
+
+    // Check for channel selected from another page (via localStorage)
     const selectedChannelId = localStorage.getItem('selectedChannelId');
     const selectedChannelName = localStorage.getItem('selectedChannelName');
     const selectedDmUser = localStorage.getItem('selectedDmUser');
 
-    // Debug log socket connection status
     console.log("Socket.IO initialization started");
 
     // Socket event listeners
@@ -42,7 +45,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const currentUsername = localStorage.getItem('username') || 'Anonymous';
         const currentUserRole = localStorage.getItem('userRole') || 'user';
         console.log("Sending user info to server:", { username: currentUsername, role: currentUserRole });
-
         socket.emit('user info', {
             username: currentUsername,
             role: currentUserRole
@@ -50,44 +52,41 @@ document.addEventListener("DOMContentLoaded", function () {
 
         displaySystemMessage("Connected to chat server");
 
-        // If there's a channel selected from another page, join it immediately
+        // Handle channel join from localStorage (e.g., from channel list)
         if (selectedChannelId && chatArea) {
             console.log("Auto-joining channel:", selectedChannelId);
             joinChannel(selectedChannelId);
-
-            // Update UI
             chatArea.style.display = 'flex';
             if (welcomeText) welcomeText.style.display = 'none';
             if (startConversationText) startConversationText.style.display = 'none';
-
-            // Update chat title
             if (document.getElementById('chatTitle')) {
                 document.getElementById('chatTitle').textContent = selectedChannelName;
             }
-
-            // Clear the localStorage items so we don't auto-join next time
             localStorage.removeItem('selectedChannelId');
             localStorage.removeItem('selectedChannelName');
         }
-        // If there's a DM user selected, start a DM
+        // Handle DM from localStorage (if set elsewhere)
         else if (selectedDmUser && chatArea) {
             console.log("Auto-joining DM with:", selectedDmUser);
-
-            // Update UI first for better user experience
             chatArea.style.display = 'flex';
             if (welcomeText) welcomeText.style.display = 'none';
             if (startConversationText) startConversationText.style.display = 'none';
-
-            // Update chat title
             if (document.getElementById('chatTitle')) {
                 document.getElementById('chatTitle').textContent = selectedDmUser;
             }
-
-            // Start the DM
             joinDM(selectedDmUser);
-
-            // Clear the localStorage item
             localStorage.removeItem('selectedDmUser');
+        }
+        // Handle DM from URL query parameter
+        else if (dmUser && chatArea) {
+            console.log("Initiating DM from URL with:", dmUser);
+            chatArea.style.display = 'flex';
+            if (welcomeText) welcomeText.style.display = 'none';
+            if (startConversationText) startConversationText.style.display = 'none';
+            if (document.getElementById('chatTitle')) {
+                document.getElementById('chatTitle').textContent = dmUser;
+            }
+            joinDM(dmUser);
         }
     });
 
