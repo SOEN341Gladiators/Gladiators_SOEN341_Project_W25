@@ -277,7 +277,6 @@ io.on('connection', (socket) => {
     });
 
 
-
     let awayTimeout = setTimeout(async () => {
         const userInfo = connectedUsers.get(socket.id);
         if (userInfo) {
