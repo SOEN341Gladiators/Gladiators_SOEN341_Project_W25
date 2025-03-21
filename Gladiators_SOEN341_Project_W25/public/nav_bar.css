@@ -800,3 +800,38 @@ body {
   border-radius: 16px;
   max-width: 70%;
 }
+
+.logout {
+  background: rgb(255, 0, 0);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: absolute;
+  top: 25px;
+  right: 200px;
+  transition: all 0.2s ease;
+}
+
+.logout:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.logout:active {
+  transform: translateY(1px);
+}
+
+
+.logout-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+:root[data-theme="light"] .logout {
+  color: white ;
+}

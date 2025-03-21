@@ -362,6 +362,12 @@ function closeChat() {
         chatMessages.innerHTML = '';
     }
 }
+function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userRole");
+    window.location.href = "index.html";
+}
+
 
 // Export functions for use in other files
 window.joinChannel = joinChannel;

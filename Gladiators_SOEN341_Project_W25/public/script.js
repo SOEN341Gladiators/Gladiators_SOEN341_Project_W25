@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
     // Handle login form
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
