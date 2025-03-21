@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Dependencies
         working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install
+        run: npm ci
       
       - name: Run Backend Tests
         working-directory: Gladiators_SOEN341_Project_W25
@@ -47,7 +47,7 @@ jobs:
       
       - name: Install dependencies
         working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install
+        run: npm ci
 
       - name: Run Frontend Tests
         working-directory: Gladiators_SOEN341_Project_W25
