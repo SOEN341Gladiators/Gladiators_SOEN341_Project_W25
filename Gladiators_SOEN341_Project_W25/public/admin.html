@@ -9,61 +9,6 @@
     <link rel="stylesheet" href="nav_bar.css">
     <link rel="stylesheet" href="admin.css">
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        /* Essential fixes for scrolling */
-        body {
-            overflow: hidden;
-            height: 100vh;
-            padding: 0;
-            margin: 0;
-        }
-
-        .admin-main {
-            display: flex;
-            margin-left: 230px;
-            /* Match sidebar width */
-            height: calc(100vh - 20px);
-            /* Ensure full height minus some padding */
-            padding: 10px;
-            overflow: hidden;
-            /* Prevent main container from scrolling */
-        }
-
-        .admin-sections-wrapper {
-            flex: 0 0 65%;
-            /* Fixed width percentage */
-            height: 100%;
-            overflow-y: auto;
-            /* Enable vertical scrolling */
-            padding-right: 20px;
-            box-sizing: border-box;
-        }
-
-        .user-list-section {
-            flex: 0 0 30%;
-            /* Fixed width percentage */
-            height: 100%;
-            overflow-y: auto;
-            /* Enable vertical scrolling */
-            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
-            padding: 15px;
-            border-radius: 8px;
-            box-sizing: border-box;
-            margin-left: 5%;
-        }
-
-        .sidebar.collapsed~.admin-main {
-            margin-left: 0;
-            width: 100%;
-        }
-
-        /* Ensure all content is visible in sections */
-        .admin-section {
-            margin-bottom: 25px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-    </style>
 </head>
 
 <body>
