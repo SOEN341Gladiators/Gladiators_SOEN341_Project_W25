@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code b
         uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -33,15 +33,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Code f
         uses: actions/checkout@v3
       
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Adjust as per your Node.js version
+          node-version: '18'
       
       - name: Install dependencies
+        working-directory: Gladiators_SOEN341_Project_W25
         run: npm install
 
       - name: Build Project
