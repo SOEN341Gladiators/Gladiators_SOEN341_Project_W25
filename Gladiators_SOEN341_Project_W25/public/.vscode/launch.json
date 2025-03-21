@@ -1,0 +1,14 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Open chat_page.html",
+            "file": "c:\\Users\\Win10\\OneDrive\\Documents\\word\\CLASS\\WINTER 2025\\SOEN 341\\Gladiators_SOEN341_Project_W25\\Gladiators_SOEN341_Project_W25\\public\\chat_page.html"
+        }
+    ]
+}
