@@ -80,10 +80,10 @@ button:hover {
 
 /* Style error messages */
 .error-message {
-    color: red;
-    font-size: 14px;
-    display: none;
-    /* Hidden by default */
+  color: #e74c3c;
+  font-size: 14px;
+  margin: 5px 0;
+  /* no display, visibility controlled by script.js*/
 }
 
 body {

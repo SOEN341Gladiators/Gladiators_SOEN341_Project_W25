@@ -43,36 +43,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // Handle login form
-    const loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        console.log("✅ Login form found!");
-        loginForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            const username = document.getElementById("loginUsername").value;
-            const password = document.getElementById("loginPassword").value;
+        const loginForm = document.getElementById("loginForm");
+        if (loginForm) {
+            console.log("✅ Login form found!");
+            loginForm.addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const username = document.getElementById("loginUsername").value;
+                const password = document.getElementById("loginPassword").value;
 
-            const response = await fetch(`${API_URL}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, password })
+                const response = await fetch(`${API_URL}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
             });
 
-            const data = await response.json();
-            if (data.token) {
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("userRole", data.role);
+                const data = await response.json();
+                const loginResult = document.getElementById("login-result");
+            
+                if (data.token) {
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("userRole", data.role);
+                    localStorage.setItem("username", username);
 
-                // IMPORTANT: Store the username in localStorage
-                localStorage.setItem("username", username);
-
-                // Redirect based on role
-                if (data.role === "admin") {
-                    window.location.href = "admin.html";
-                } else {
-                    window.location.href = "member.html";
-                }
+                    // Redirect based on role
+                    if (data.role === "admin") {
+                        window.location.href = "admin.html";
+                    } else {
+                        window.location.href = "member.html";
+                    }
             } else {
-                document.getElementById("login-result").innerText = data.error;
+                loginResult.innerText = data.error || "Invalid username or password, Please try again";
+                loginResult.style.display = "block"; // Make the error message visible
             }
         });
     }
