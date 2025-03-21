@@ -37,6 +37,10 @@ jobs:
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm install socket.io-client
 
+      - name: Run jsdom
+        working-directory: Gladiators_SOEN341_Project_W25
+        run: npm install --save-dev jest-environment-jsdom
+        
       - name: Run Tests
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm test
