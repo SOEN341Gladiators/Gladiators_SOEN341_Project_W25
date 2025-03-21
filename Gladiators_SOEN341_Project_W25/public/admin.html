@@ -9,6 +9,61 @@
     <link rel="stylesheet" href="nav_bar.css">
     <link rel="stylesheet" href="admin.css">
     <script src="/socket.io/socket.io.js"></script>
+    <style>
+        /* Essential fixes for scrolling */
+        body {
+            overflow: hidden;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .admin-main {
+            display: flex;
+            margin-left: 230px;
+            /* Match sidebar width */
+            height: calc(100vh - 20px);
+            /* Ensure full height minus some padding */
+            padding: 10px;
+            overflow: hidden;
+            /* Prevent main container from scrolling */
+        }
+
+        .admin-sections-wrapper {
+            flex: 0 0 65%;
+            /* Fixed width percentage */
+            height: 100%;
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+            padding-right: 20px;
+            box-sizing: border-box;
+        }
+
+        .user-list-section {
+            flex: 0 0 30%;
+            /* Fixed width percentage */
+            height: 100%;
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            padding: 15px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin-left: 5%;
+        }
+
+        .sidebar.collapsed~.admin-main {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        /* Ensure all content is visible in sections */
+        .admin-section {
+            margin-bottom: 25px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 
 <body>
@@ -37,89 +92,105 @@
 
     <!-- Admin main content area -->
     <div class="admin-main">
-        <h1>Admin Dashboard</h1>
+        <!-- Left column - Admin sections -->
+        <div class="admin-sections-wrapper">
+            <h1>Admin Dashboard</h1>
+            <!-- Create Team Section -->
+            <div class="admin-section">
+                <h2>Create a Team</h2>
+                <form id="createTeamForm">
+                    <div>
+                        <label for="teamName">Team Name:</label>
+                        <input type="text" id="teamName" placeholder="Enter team name" required>
+                    </div>
+                    <div>
+                        <label for="teamUsers">Team Members (comma-separated usernames):</label>
+                        <textarea id="teamUsers" placeholder="user1, user2, user3" required></textarea>
+                    </div>
+                    <button type="submit">Create Team</button>
+                </form>
+                <div id="team-result" class="result-message"></div>
+            </div>
 
-        <!-- Create Team Section -->
-        <div class="admin-section">
-            <h2>Create a Team</h2>
-            <form id="createTeamForm">
-                <div>
-                    <label for="teamName">Team Name:</label>
-                    <input type="text" id="teamName" placeholder="Enter team name" required>
-                </div>
-                <div>
-                    <label for="teamUsers">Team Members (comma-separated usernames):</label>
-                    <textarea id="teamUsers" placeholder="user1, user2, user3" required></textarea>
-                </div>
-                <button type="submit">Create Team</button>
-            </form>
-            <div id="team-result" class="result-message"></div>
+            <!-- Create Channel Section -->
+            <div class="admin-section">
+                <h2>Create a Channel</h2>
+                <form id="createChannelForm">
+                    <div>
+                        <label for="channelName">Channel Name:</label>
+                        <input type="text" id="channelName" placeholder="Enter channel name" required>
+                    </div>
+                    <div>
+                        <label for="channelTeam">Team:</label>
+                        <select id="channelTeam" required>
+                            <!-- Teams will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="channelUsers">Channel Members (comma-separated usernames):</label>
+                        <textarea id="channelUsers" placeholder="user1, user2, user3" required></textarea>
+                    </div>
+                    <button type="submit">Create Channel</button>
+                </form>
+                <div id="channel-result" class="result-message"></div>
+            </div>
+
+            <!-- Create Default Channel Section -->
+            <div class="admin-section">
+                <h2>Create Default Channel</h2>
+                <p class="section-description">Default channels are accessible to all users regardless of their team.
+                </p>
+                <form id="createDefaultChannelForm">
+                    <div>
+                        <label for="defaultChannelName">Channel Name:</label>
+                        <input type="text" id="defaultChannelName" placeholder="Enter default channel name" required>
+                    </div>
+                    <button type="submit">Create Default Channel</button>
+                </form>
+                <div id="default-channel-result" class="result-message"></div>
+            </div>
+
+            <!-- View Teams Section -->
+            <div class="admin-section">
+                <h2>Teams</h2>
+                <ul id="adminTeamList">
+                    <!-- Teams will be populated dynamically -->
+                </ul>
+            </div>
+
+            <!-- View Channels Section -->
+            <div class="admin-section">
+                <h2>Channels</h2>
+                <ul id="adminChannelList">
+                    <!-- Channels will be populated dynamically -->
+                </ul>
+            </div>
+
+            <!-- View Default Channels Section -->
+            <div class="admin-section">
+                <h2>Default Channels</h2>
+                <ul id="defaultChannelsList">
+                    <!-- Default channels will be populated dynamically -->
+                    <li>Loading default channels...</li>
+                </ul>
+            </div>
         </div>
 
-        <!-- Create Channel Section -->
-        <div class="admin-section">
-            <h2>Create a Channel</h2>
-            <form id="createChannelForm">
-                <div>
-                    <label for="channelName">Channel Name:</label>
-                    <input type="text" id="channelName" placeholder="Enter channel name" required>
-                </div>
-                <div>
-                    <label for="channelTeam">Team:</label>
-                    <select id="channelTeam" required>
-                    </select>
-                </div>
-                <div>
-                    <label for="channelUsers">Channel Members (comma-separated usernames):</label>
-                    <textarea id="channelUsers" placeholder="user1, user2, user3" required></textarea>
-                </div>
-                <button type="submit">Create Channel</button>
-            </form>
-            <div id="channel-result" class="result-message"></div>
-        </div>
-
-        <!-- Create Default Channel Section (NEW) -->
-        <div class="admin-section">
-            <h2>Create Default Channel</h2>
-            <p class="section-description">Default channels are accessible to all users regardless of their team.</p>
-            <form id="createDefaultChannelForm">
-                <div>
-                    <label for="defaultChannelName">Channel Name:</label>
-                    <input type="text" id="defaultChannelName" placeholder="Enter default channel name" required>
-                </div>
-                <button type="submit">Create Default Channel</button>
-            </form>
-            <div id="default-channel-result" class="result-message"></div>
-        </div>
-
-        <!-- View Teams Section -->
-        <div class="admin-section">
-            <h2>Teams</h2>
-            <ul id="adminTeamList">
-                <!-- Teams will be populated dynamically -->
-            </ul>
-        </div>
-
-        <!-- View Channels Section -->
-        <div class="admin-section">
-            <h2>Channels</h2>
-            <ul id="adminChannelList">
-                <!-- Channels will be populated dynamically -->
-            </ul>
-        </div>
-
-        <!-- View Default Channels Section (NEW) -->
-        <div class="admin-section">
-            <h2>Default Channels</h2>
-            <ul id="defaultChannelsList">
-                <!-- Default channels will be populated dynamically -->
-                <li>Loading default channels...</li>
+        <!-- Right column - Registered Users -->
+        <div class="user-list-section">
+            <h2>Registered Users</h2>
+            <div class="user-search">
+                <input type="text" id="userSearch" placeholder="Search users..." aria-label="Search users">
+            </div>
+            <ul id="userList" class="user-list">
+                <li class="loading">Loading users...</li>
             </ul>
         </div>
     </div>
 
     <!-- Chat Area (Initially hidden) -->
     <div class="chat-area" id="chatArea" style="display: none;">
+        <button class="close-chat-btn" onclick="closeChat()">Close Chat</button>
         <div class="chat-header">
             <h2 id="chatTitle">Channel/Recipient Name</h2>
         </div>
@@ -137,6 +208,7 @@
     <script src="messaging.js"></script>
     <script src="admin.js"></script>
     <script src="nav_bar.js"></script>
+    <script src="registered_users.js"></script>
 </body>
 
 </html>
