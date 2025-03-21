@@ -91,16 +91,181 @@ body {
 
 /* Improved list styling */
 #adminTeamList,
-#adminChannelList {
+#adminChannelList,
+#defaultChannelsList {
     list-style-type: none;
     padding: 0;
 }
 
 #adminTeamList li,
-#adminChannelList li {
+#adminChannelList li,
+#defaultChannelsList li {
     background-color: #f5f5f5;
     padding: 12px 15px;
     margin-bottom: 8px;
     border-radius: 5px;
     font-size: 1rem;
+}
+
+/* Default channels styling */
+#defaultChannelsList li {
+    border-left: 3px solid #ffcc00;
+    /* Yellow indicator for default channels */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-description {
+    color: #777;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+/* Default channel item styling */
+.channel-info {
+    flex: 1;
+}
+
+.channel-name {
+    font-weight: bold;
+}
+
+.channel-creator {
+    font-size: 0.8em;
+    color: #777;
+}
+
+.channel-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-view {
+    background-color: #5563DE;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.btn-view:hover {
+    background-color: #4152c7;
+}
+
+/* Loading and error states */
+.loading {
+    color: #777;
+    font-style: italic;
+    text-align: center;
+}
+
+.error {
+    color: #e74c3c;
+    text-align: center;
+}
+
+.no-channels {
+    color: #777;
+    font-style: italic;
+    text-align: center;
+}
+
+
+
+
+/* Essential fixes for scrolling */
+body {
+    overflow: hidden;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-main {
+    display: flex;
+    margin-left: 230px;
+    /* Match sidebar width */
+    height: calc(100vh - 20px);
+    /* Ensure full height minus some padding */
+    padding: 10px;
+    overflow: hidden;
+    /* Prevent main container from scrolling */
+}
+
+.admin-sections-wrapper {
+    flex: 0 0 65%;
+    /* Fixed width percentage */
+    height: 100%;
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+.user-list-section {
+    flex: 0 0 30%;
+    /* Fixed width percentage */
+    height: 100%;
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+    padding: 15px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    margin-left: 5%;
+}
+
+.sidebar.collapsed~.admin-main {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Ensure all content is visible in sections */
+.admin-section {
+    margin-bottom: 25px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Top bar with logout */
+.top-bar {
+    width: 100%;
+    background-color: #5563DE;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    z-index: 100;
+}
+
+.top-bar h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.logout-btn {
+    background-color: #e74c3c;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    width: 60px;
+    height: 40px;
+    border-radius: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
 }
