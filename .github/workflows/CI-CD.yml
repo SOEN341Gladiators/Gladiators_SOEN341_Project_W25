@@ -27,7 +27,7 @@ jobs:
       
       - name: Run Backend Tests
         working-directory: Gladiators_SOEN341_Project_W25
-        run: npm test
+        run: npm test --verbose
 
       - name: Build Project
         working-directory: Gladiators_SOEN341_Project_W25
@@ -51,7 +51,7 @@ jobs:
 
       - name: Run Frontend Tests
         working-directory: Gladiators_SOEN341_Project_W25
-        run: npm test
+        run: npm test --verbose
 
       - name: Build Project
         working-directory: Gladiators_SOEN341_Project_W25
