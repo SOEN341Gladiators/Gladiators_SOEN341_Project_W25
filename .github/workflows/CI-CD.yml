@@ -24,6 +24,18 @@ jobs:
       - name: Install Dependencies
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm install
+        
+      - name: Run supertest
+        working-directory: Gladiators_SOEN341_Project_W25
+        run: npm install supertest --save-dev
+
+      - name: Run server memory
+        working-directory: Gladiators_SOEN341_Project_W25
+        run: npm install --save-dev mongodb-memory-server
+
+      - name: Run socket
+        working-directory: Gladiators_SOEN341_Project_W25
+        run: npm install socket.io-client
 
       - name: Run Tests
         working-directory: Gladiators_SOEN341_Project_W25
