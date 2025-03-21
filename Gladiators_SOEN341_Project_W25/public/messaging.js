@@ -115,6 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
         messageInput.value = "";
     }
 
+
     // Event listeners for sending messages
     if (chatForm) {
         chatForm.addEventListener("submit", sendMessage);
@@ -126,6 +127,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 event.preventDefault();
                 sendMessage(event);
             }
+        });
+    }
+
+    const sendButton = document.querySelector("#chatForm button[type='button']");
+    if (sendButton) {
+        sendButton.addEventListener("click", function(e) {
+            e.preventDefault();
+            sendMessage(e);
         });
     }
 
