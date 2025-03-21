@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  backend-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,41 +24,34 @@ jobs:
       - name: Install Dependencies
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm install
-        
-      - name: Run supertest
-        working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install supertest --save-dev
-
-      - name: Run server memory
-        working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install --save-dev mongodb-memory-server
-
-      - name: Run socket
-        working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install socket.io
-
-      - name: Run socket
-        working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install socket.io-client
-
-      - name: Run jsdom
-        working-directory: Gladiators_SOEN341_Project_W25
-        run: npm install --save-dev jest-environment-jsdom
-        
-      - name: Run Tests
+      
+      - name: Run Backend Tests
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm test
+        
+  frontend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Adjust as per your Node.js version
+      
+      - name: Install dependencies
+        run: npm install
 
       - name: Build Project
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm run build
 
   deploy:
-    needs: build
+    needs: [backend-test, frontend-tests]
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy to Production
-        run: |
-          echo "Deploying to production..."
-          # Add deployment commands here, e.g., SSH, S3, Firebase, Vercel, etc.
+        run: echo "Deploying to production..."
