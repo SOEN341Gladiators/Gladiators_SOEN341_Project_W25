@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Channel - ChatHaven</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="nav_bar.css">
+    <link rel="stylesheet" href="create_channel.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <!-- Navigation Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <span>ChatHaven</span>
+        </div>
+        <form class="search-form">
+            <input type="search" class="search-input" id="searchInput" placeholder="Search channels..."
+                aria-label="Search channels">
+        </form>
+        <div class="add-friend-section">
+            <div class="add-friend-title">
+                <span class="add-icon">➕</span> Add friend 🫂
+            </div>
+            <form id="addFriendForm" style="display: none;">
+                <input type="text" id="newFriendName" placeholder="Friend name" required>
+                <button type="submit" class="add-friend-btn">Add</button>
+            </form>
+        </div>
+        <div class="private-channels-section">
+            <div class="private-channels-title">
+                <span class="section-title">🔒 Private Channels</span>
+            </div>
+            <div id="privateChannelsList">
+                <!-- Private channels will be loaded here -->
+            </div>
+        </div>
+        <div class="channel-list" id="channelList">
+            <div class="no-channels" id="noChannels">No channels found</div>
+        </div>
+    </div>
+
+    <button id="sidebarToggle" class="sidebar-toggle">⬅️</button>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-container">
+        <h1>Create Your Private Channel</h1>
+
+        <!-- Create Channel Form -->
+        <div class="form-container">
+            <h2>Channel Details</h2>
+            <form id="createPrivateChannelForm">
+                <div class="form-group">
+                    <label for="channelName">Channel Name:</label>
+                    <input type="text" id="channelName" name="channelName" placeholder="Enter channel name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="invitedUsers">Invite Users (comma-separated usernames):</label>
+                    <textarea id="invitedUsers" name="invitedUsers" placeholder="user1, user2, user3"></textarea>
+                    <div class="help-text">These users will receive invitations to join your channel</div>
+                </div>
+
+                <button type="submit" class="btn-primary">Create Private Channel</button>
+            </form>
+            <div id="create-result" class="result-message"></div>
+        </div>
+
+        <!-- Pending Invitations Section -->
+        <div class="section-container">
+            <h2>Pending Invitations</h2>
+            <div id="pendingInvites">
+                <!-- Pending invitations will be displayed here -->
+                <div class="loading-text">Loading invitations...</div>
+            </div>
+        </div>
+
+        <!-- Channel Management Section -->
+        <div class="section-container">
+            <h2>Your Channels</h2>
+            <div class="channels-list">
+                <div id="userPrivateChannels">
+                    <!-- User's private channels will be listed here -->
+                    <div class="loading-text">Loading your channels...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="authenticate.js"></script>
+    <script src="create_channel.js"></script>
+    <script src="nav_bar.js"></script>
+</body>
+
+</html>

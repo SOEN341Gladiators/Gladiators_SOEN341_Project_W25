@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const createChannelForm = document.getElementById("createChannelForm");
     const createTeamForm = document.getElementById("createTeamForm");
+    const createDefaultChannelForm = document.getElementById("createDefaultChannelForm");
 
     if (!createChannelForm || !createTeamForm) {
         console.error("❌ Form elements not found. Check admin.html IDs.");
@@ -110,6 +111,54 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Create a Default Channel (NEW)
+    if (createDefaultChannelForm) {
+        createDefaultChannelForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const name = document.getElementById("defaultChannelName").value.trim();
+
+            console.log(`🔹 Sending request to create default channel: '${name}'`);
+
+            if (!name) {
+                alert("❌ Please enter a channel name.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/default-channel`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + localStorage.getItem("token")
+                    },
+                    body: JSON.stringify({ name })
+                });
+
+                const data = await response.json();
+                console.log("🔹 Server Response:", data);
+
+                if (response.ok) {
+                    alert(`✅ Default channel '${name}' created successfully!`);
+                    document.getElementById("defaultChannelName").value = "";
+                    document.getElementById("default-channel-result").innerText = data.message || "Default channel created successfully!";
+                    loadDefaultChannels();
+
+                    // Refresh the channel list in the sidebar
+                    if (typeof window.fetchChannels === 'function') {
+                        window.fetchChannels();
+                    }
+                } else {
+                    alert(`❌ Error: ${data.error}`);
+                    document.getElementById("default-channel-result").innerText = data.error || "Failed to create default channel";
+                }
+            } catch (error) {
+                console.error("❌ Error sending default channel creation request:", error);
+                alert("❌ Failed to create default channel! Check server logs.");
+                document.getElementById("default-channel-result").innerText = "Failed to create default channel. Check server logs.";
+            }
+        });
+    }
+
     // Load Teams
     async function loadTeams() {
         try {
@@ -171,13 +220,99 @@ document.addEventListener("DOMContentLoaded", function () {
 
             console.log("✅ Channels received:", channels);
 
+            // Filter out default channels - they'll be displayed separately
+            const teamChannels = channels.filter(channel => !channel.isDefault);
+
             const channelList = document.getElementById("adminChannelList");
-            channelList.innerHTML = channels.map(channel => {
+            channelList.innerHTML = teamChannels.map(channel => {
                 const teamName = channel.team ? channel.team.name : 'No team';
                 return `<li>${channel.name} (Team: ${teamName})</li>`;
             }).join("");
         } catch (error) {
             console.error("❌ Error loading channels:", error);
+        }
+    }
+
+    // Load Default Channels (NEW)
+    async function loadDefaultChannels() {
+        try {
+            console.log("🔹 Fetching default channels...");
+            const defaultChannelsList = document.getElementById("defaultChannelsList");
+
+            if (!defaultChannelsList) {
+                console.log("⚠️ Default channels list element not found in the DOM.");
+                return;
+            }
+
+            defaultChannelsList.innerHTML = '<li class="loading">Loading default channels...</li>';
+
+            const response = await fetch(`${API_URL}/channels`, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch channels');
+            }
+
+            const channels = await response.json();
+
+            // Filter for default channels
+            const defaultChannels = channels.filter(channel => channel.isDefault);
+
+            if (defaultChannels.length === 0) {
+                defaultChannelsList.innerHTML = '<li class="no-channels">No default channels found</li>';
+                return;
+            }
+
+            // Display each default channel
+            defaultChannelsList.innerHTML = defaultChannels.map(channel => {
+                return `
+                <li>
+                    <div class="channel-info">
+                        <span class="channel-name">${channel.name}</span>
+                        <span class="channel-creator">Created by: ${channel.createdBy ? 'Admin' : 'System'}</span>
+                    </div>
+                </li>
+                `;
+            }).join('');
+
+            // Add event listeners to view buttons
+            defaultChannelsList.querySelectorAll('.btn-view').forEach(button => {
+                button.addEventListener('click', function () {
+                    const channelId = this.getAttribute('data-channel-id');
+                    const channelName = this.getAttribute('data-channel-name');
+                    viewDefaultChannelMessages(channelId, channelName);
+                });
+            });
+
+            console.log("✅ Default channels loaded:", defaultChannels.length);
+        } catch (error) {
+            console.error("❌ Error loading default channels:", error);
+            if (document.getElementById("defaultChannelsList")) {
+                document.getElementById("defaultChannelsList").innerHTML = '<li class="error">Error loading default channels</li>';
+            }
+        }
+    }
+
+    // Function to view default channel messages
+    function viewDefaultChannelMessages(channelId, channelName) {
+        // Store the channel info in localStorage for the chat page to use
+        localStorage.setItem('selectedChannelId', channelId);
+        localStorage.setItem('selectedChannelName', channelName);
+
+        // Show chat area instead of redirecting (matching existing behavior)
+        const chatArea = document.getElementById('chatArea');
+        if (chatArea) {
+            chatArea.style.display = 'flex';
+            const chatTitle = document.getElementById('chatTitle');
+            if (chatTitle) chatTitle.textContent = channelName;
+
+            // Join the channel using socket.io if messaging.js is loaded
+            if (typeof window.joinChannel === 'function') {
+                window.joinChannel(channelId);
+            }
         }
     }
 
@@ -194,4 +329,5 @@ document.addEventListener("DOMContentLoaded", function () {
     // Load data on page load
     loadTeams();
     loadChannels();
+    loadDefaultChannels(); // Load default channels
 });

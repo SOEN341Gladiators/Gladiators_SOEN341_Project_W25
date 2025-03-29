@@ -151,36 +151,67 @@ document.addEventListener("DOMContentLoaded", function () {
     const welcomeText = document.getElementById("welcomeText");
     const startConversationText = document.getElementById("startConversationText");
 
-    // Check for channel selected from admin page
+    // Parse DM user from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const dmUser = urlParams.get('dm');
+
+    // Check for channel selected from another page (via localStorage)
     const selectedChannelId = localStorage.getItem('selectedChannelId');
     const selectedChannelName = localStorage.getItem('selectedChannelName');
+    const selectedDmUser = localStorage.getItem('selectedDmUser');
 
-    // Debug log socket connection status
     console.log("Socket.IO initialization started");
 
     // Socket event listeners
     socket.on("connect", () => {
         console.log("Connected to chat server. Socket ID:", socket.id);
+
+        // Send user info to server
+        const currentUsername = localStorage.getItem('username') || 'Anonymous';
+        const currentUserRole = localStorage.getItem('userRole') || 'user';
+        console.log("Sending user info to server:", { username: currentUsername, role: currentUserRole });
+        socket.emit('user info', {
+            username: currentUsername,
+            role: currentUserRole
+        });
+
         displaySystemMessage("Connected to chat server");
 
-        // If there's a channel selected from admin page, join it immediately
+        // Handle channel join from localStorage (e.g., from channel list)
         if (selectedChannelId && chatArea) {
-            console.log("Auto-joining channel from admin page:", selectedChannelId);
+            console.log("Auto-joining channel:", selectedChannelId);
             joinChannel(selectedChannelId);
-
-            // Update UI
             chatArea.style.display = 'flex';
             if (welcomeText) welcomeText.style.display = 'none';
             if (startConversationText) startConversationText.style.display = 'none';
-
-            // Update chat title
             if (document.getElementById('chatTitle')) {
                 document.getElementById('chatTitle').textContent = selectedChannelName;
             }
-
-            // Clear the localStorage items so we don't auto-join next time
             localStorage.removeItem('selectedChannelId');
             localStorage.removeItem('selectedChannelName');
+        }
+        // Handle DM from localStorage (if set elsewhere)
+        else if (selectedDmUser && chatArea) {
+            console.log("Auto-joining DM with:", selectedDmUser);
+            chatArea.style.display = 'flex';
+            if (welcomeText) welcomeText.style.display = 'none';
+            if (startConversationText) startConversationText.style.display = 'none';
+            if (document.getElementById('chatTitle')) {
+                document.getElementById('chatTitle').textContent = selectedDmUser;
+            }
+            joinDM(selectedDmUser);
+            localStorage.removeItem('selectedDmUser');
+        }
+        // Handle DM from URL query parameter
+        else if (dmUser && chatArea) {
+            console.log("Initiating DM from URL with:", dmUser);
+            chatArea.style.display = 'flex';
+            if (welcomeText) welcomeText.style.display = 'none';
+            if (startConversationText) startConversationText.style.display = 'none';
+            if (document.getElementById('chatTitle')) {
+                document.getElementById('chatTitle').textContent = dmUser;
+            }
+            joinDM(dmUser);
         }
     });
 
@@ -254,8 +285,14 @@ function displayMessage(data) {
     const currentUsername = localStorage.getItem('username') || 'Anonymous';
     const currentUserRole = localStorage.getItem('userRole') || 'user';
 
-    if (data.username === currentUsername) {
+    // Determine if this is the current user's message
+    const isOwnMessage = data.username === currentUsername;
+
+    // Apply appropriate class based on who sent the message
+    if (isOwnMessage) {
         messageDiv.classList.add("own-message");
+    } else {
+        messageDiv.classList.add("other-message");
     }
 
     const timestamp = new Date(data.timestamp).toLocaleTimeString();
@@ -352,16 +389,18 @@ function updateDeletedMessage(messageId) {
 }
 
 function deleteMessage(messageId) {
-    // Get the current user role
-    const userRole = localStorage.getItem('userRole') || 'user';
+    // Get the current user role directly from localStorage
+    const currentUserRole = localStorage.getItem('userRole') || 'user';
+
+    console.log("Current user role when deleting:", currentUserRole);
 
     // Only allow admins to delete messages
-    if (userRole !== 'admin') {
+    if (currentUserRole !== 'admin') {
         console.log("Only admins can delete messages");
         return;
     }
 
-    console.log("Requesting message deletion:", messageId);
+    console.log("Requesting message deletion for message ID:", messageId);
     socket.emit("delete message", messageId);
 }
 
@@ -375,6 +414,7 @@ if (typeof window !== "undefined") {    // Allow for testing and more robustness
     window.joinDM = joinDM;
     window.socket = socket; // Expose socket for testing purposes
 }
+
 function setCurrentChannel(channel) {
     currentChannel = channel;
 }
@@ -391,3 +431,4 @@ module.exports = {
     setCurrentChannel,
     getCurrentChannel
 };
+

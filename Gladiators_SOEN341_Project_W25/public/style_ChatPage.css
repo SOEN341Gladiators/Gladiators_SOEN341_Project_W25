@@ -1,59 +1,489 @@
-/* Apply basic styling to the entire page */
+/* Main container styles */
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    /* Stack elements vertically */
-    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
     height: 100vh;
-    /* Full viewport height */
-    background-color: #f4f4f4;
+    overflow: hidden;
+    background-color: #f5f7fb;
+    display: flex;
 }
 
-.chat-container {
-    width: 1000px;
-    height: 500px;
+/* Dashboard container */
+.dashboard-container {
+    flex: 1;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #ccc;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Channel title */
+.channel-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Welcome text */
+.welcome-text {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+    margin-top: 100px;
+}
+
+.start-conversation-text {
+    font-size: 18px;
+    color: #666;
+    text-align: center;
+}
+
+/* Chat area */
+.chat-area {
+    display: none;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    background-color: white;
     border-radius: 10px;
-    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
-.chat-box {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-    border-bottom: 1px solid #ccc;
+
+.chat-header {
+    padding: 15px;
+    background-color: #f0f2f5;
+    border-bottom: 1px solid #ddd;
 }
+
+.chat-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+/* Message styling for different users */
 .message {
-    background: lightblue;
-    padding: 8px;
-    margin: 5px;
-    border-radius: 5px;
+    max-width: 70%;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    padding: 10px;
+    position: relative;
+}
+
+.own-message {
+    align-self: flex-end;
+    margin-left: auto;
+    background-color: #3a4e7a;
+    /* Dark blue for the current user's messages */
+    color: white;
+}
+
+.other-message {
+    align-self: flex-start;
+    margin-right: auto;
+    background-color: #2ecc71;
+    /* Green for other users' messages */
+    color: white;
+}
+
+.message-username {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.message-text {
+    word-break: break-word;
+}
+
+.message-timestamp {
+    align-self: flex-end;
+    font-size: 0.8em;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
+}
+
+/* Ensure the chat area has proper flex layout */
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    overflow-y: auto;
+    height: calc(100% - 60px);
+}
+
+/* System message styling */
+.system-message {
+    align-self: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    margin: 10px 0;
     max-width: 80%;
 }
-.input-container {
+
+/* Chat form */
+.chat-form {
     display: flex;
     padding: 10px;
-    background: #fff;
+    border-top: 1px solid #ddd;
+    background-color: #f0f2f5;
 }
-input {
+
+.chat-form input {
     flex: 1;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 14px;
 }
-button {
-    padding: 10px;
-    border: none;
-    background: rgb(44, 79, 161);
+
+.chat-form button {
+    background-color: #4361ee;
     color: white;
-    margin-left: 5px;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.chat-form button:hover {
+    background-color: #3a56e4;
+}
+
+.close-chat-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Theme toggle */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: #333;
+    font-size: 14px;
+}
+
+.theme-toggle-icon {
+    margin-right: 5px;
+    font-size: 18px;
+}
+
+/* Deleted message styling */
+.message-text.deleted {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Dropdown styling for message actions */
+.message-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+.message-actions:hover {
+    opacity: 1;
+}
+
+.Dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 20px;
+    background-color: white;
     border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.Dropdown-menu.show {
+    display: block;
+}
+
+.delete-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #e74c3c;
+}
+
+.delete-option:hover {
+    background-color: #f8f8f8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .dashboard-container {
+        padding: 10px;
+    }
+}
+
+/* Dark theme styles */
+body.dark-theme {
+    background-color: #1f2937;
+    color: #f3f4f6;
+}
+
+body.dark-theme .dashboard-container {
+    background-color: #1f2937;
+}
+
+body.dark-theme .welcome-text,
+body.dark-theme .channel-title {
+    color: #f3f4f6;
+}
+
+body.dark-theme .start-conversation-text {
+    color: #d1d5db;
+}
+
+body.dark-theme .chat-area {
+    background-color: #111827;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .chat-header {
+    background-color: #2a3441;
+    border-bottom: 1px solid #374151;
+}
+
+body.dark-theme .chat-header h2 {
+    color: #f3f4f6;
+}
+
+body.dark-theme .system-message {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+body.dark-theme .chat-form {
+    background-color: #2a3441;
+    border-top: 1px solid #374151;
+}
+
+body.dark-theme .chat-form input {
+    background-color: #111827;
+    border: 1px solid #374151;
+    color: #f3f4f6;
+}
+
+body.dark-theme .theme-toggle {
+    color: #f3f4f6;
+}
+
+body.dark-theme .Dropdown-menu {
+    background-color: #2a3441;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .delete-option {
+    color: #f87171;
+}
+
+body.dark-theme .delete-option:hover {
+    background-color: #374151;
+}
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 100;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .sidebar-toggle {
+        display: block;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+.channel-admin-controls {
+    position: absolute;
+    top: 10px;
+    right: 60px;
+    /* Position it to the left of the close button */
+    z-index: 10;
+}
+
+.channel-admin-btn {
+    background-color: #5563DE;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.channel-admin-btn:hover {
+    background-color: #4352cd;
+}
+
+.requests-panel {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 280px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .requests-panel {
+    background-color: #2a2a2a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.requests-panel.visible {
+    display: block;
+}
+
+.requests-panel-header {
+    padding: 12px 16px;
+    background-color: #5563DE;
+    color: white;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.requests-panel-header .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
     cursor: pointer;
 }
-button:hover {
-    background: lightblue;
+
+.requests-panel-content {
+    padding: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.no-requests-message {
+    text-align: center;
+    padding: 16px;
+    color: #777;
+    font-style: italic;
+}
+
+[data-theme="dark"] .no-requests-message {
+    color: #aaa;
+}
+
+.join-request-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+[data-theme="dark"] .join-request-item {
+    border-bottom-color: #444;
+}
+
+.join-request-item:last-child {
+    border-bottom: none;
+}
+
+.request-username {
+    font-weight: 500;
+}
+
+.request-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.accept-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.accept-btn:hover {
+    background-color: #218838;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.reject-btn:hover {
+    background-color: #c82333;
+}
+
+.badge-count {
+    display: inline-block;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    font-size: 0.7rem;
+    line-height: 18px;
+    margin-left: 6px;
 }

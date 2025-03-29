@@ -57,12 +57,20 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             const data = await response.json();
+            console.log("Login response:", data);
+
             if (data.token) {
                 localStorage.setItem("token", data.token);
                 localStorage.setItem("userRole", data.role);
-
-                // IMPORTANT: Store the username in localStorage
                 localStorage.setItem("username", username);
+
+                // Store the userId in localStorage
+                if (data.userId) {
+                    localStorage.setItem("userId", data.userId);
+                    console.log("User ID stored in localStorage:", data.userId);
+                } else {
+                    console.warn("Warning: userId not received from server");
+                }
 
                 // Redirect based on role
                 if (data.role === "admin") {
