@@ -65,6 +65,126 @@ body {
     color: #333;
 }
 
+/* Reply Area */
+.reply-indicator {
+    background-color: #e0e0e0; /* Slightly darker gray for better visibility */
+    border-radius: 8px; /* Softer, modern rounded corners */
+    padding: 10px 15px; /* More horizontal padding for breathing room */
+    margin-bottom: 10px; /* Consistent spacing below */
+    display: flex; /* Flexbox for flexible layout */
+    justify-content: space-between; /* Space out icon, text, and button */
+    align-items: center; /* Center contents vertically */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Enhanced shadow for a floating effect */
+    opacity: 0; /* Hidden by default for animation */
+    transform: translateY(-10px); /* Start above for slide-in */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth animation */
+}
+
+.reply-icon {
+    font-size: 14px; /* Subtle size for the icon */
+    color: #666; /* Muted gray to complement the design */
+    margin-right: 5px; /* Space between icon and text */
+}
+
+.reply-indicator span#replyText {
+    font-size: 15px; /* Slightly larger for readability */
+    color: #222; /* Darker text for contrast */
+    font-weight: 500; /* Medium weight for a modern touch */
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide excess text */
+    text-overflow: ellipsis; /* Ellipsis for long text */
+    flex: 1; /* Fill available space */
+}
+
+.reply-indicator button {
+    background: none; /* Minimalist button */
+    border: none; /* No border */
+    font-size: 18px; /* Larger cancel icon */
+    cursor: pointer; /* Indicate clickability */
+    color: #e70000; /* Light gray for subtlety */
+    position: relative; /* For hover effect positioning */
+    padding: 5px; /* Larger clickable area */
+}
+
+.reply-indicator button::before {
+    content: ''; /* Pseudo-element for hover background */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px; /* Circular hover area */
+    height: 24px;
+    border-radius: 50%; /* Rounded shape */
+    background-color: transparent; /* Invisible by default */
+    transition: background-color 0.2s ease; /* Smooth hover transition */
+}
+
+.reply-indicator button:hover::before {
+    background-color: rgba(0, 0, 0, 0.1); /* Subtle gray background on hover */
+}
+
+.reply-indicator button:hover {
+    color: #555; /* Darker gray on hover for feedback */
+}
+
+.reply-button {
+    margin-top: 8px;
+    background-color: #333333;
+    border: none; /* Removes default border for a flat look */
+    border-radius: 8px;
+    color: #fff;
+    width: 80px;
+    align-items: center;
+    padding: 4px 16px; /* Larger padding for better clickability */
+    font-size: 12px; /* Slightly bigger text for readability */
+    font-weight: 500; /* Medium weight for modern typography */
+    cursor: pointer; /* Shows it’s clickable */
+    transition: background-color 0.2s ease, transform 0.1s ease; /* Smooth effects */
+}
+
+.reply-button:hover {
+    background-color: #444444; /* Lightens on hover */
+}
+
+.reply-button:active {
+    transform: scale(0.98); /* Slight shrink on click */
+    background-color: #222222; /* Darkens when pressed */
+}
+
+.reply-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* Focus ring for accessibility */
+}
+
+.replied-message {
+    background-color: #f0f0f0;          /* Light gray background for subtle contrast */
+    color: #666;                        /* Muted text color to indicate it's a reference */
+    border-left: 4px solid #007bff;     /* Blue left border to visually cue a quote */
+    padding: 10px;                      /* Internal spacing for readability */
+    margin-bottom: 10px;                /* Space below to separate from the main message */
+    font-size: 0.9em;                   /* Slightly smaller text to differentiate it */
+    border-radius: 4px;                 /* Rounded corners for a modern feel */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    cursor: pointer;                    /* Hand cursor to suggest interactivity */
+    width: 100%;                        /* Full width of the parent container */
+    white-space: nowrap;                /* Prevents text wrapping */
+    overflow: hidden;                   /* Hides excess text */
+    text-overflow: ellipsis;            /* Adds "..." for truncated text */
+    transition: background-color 0.2s ease; /* Smooth hover transition */
+}
+
+.replied-message:hover {
+    background-color: #e8e8e8;          /* Lighter background on hover for feedback */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+    .reply-indicator {
+        padding: 8px; /* Reduced padding on mobile */
+        font-size: 12px; /* Smaller text */
+    }
+}
+
 /* Message styling for different users */
 .message {
     max-width: 70%;
