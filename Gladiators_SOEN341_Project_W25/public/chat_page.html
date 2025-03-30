@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="style_ChatPage.css">
     <link rel="stylesheet" href="nav_bar.css">
     <script src="/socket.io/socket.io.js"></script>
+    <!-- Add emoji-mart libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/data"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@5.5.2/dist/browser.js"></script>
     <style>
         /* Make sure chat header has the right style */
         .chat-header {
@@ -211,6 +214,7 @@
             </div>
             <div class="chat-messages" id="chatMessages"></div>
             <form id="chatForm" class="chat-form">
+                <button type="button" id="emojiButton" class="emoji-button">😊</button>
                 <input type="text" id="chatInput" placeholder="Type your message here...">
                 <button type="submit">Send</button>
             </form>
@@ -227,6 +231,10 @@
         </div>
     </div>
 
+    <!-- Emoji picker container -->
+    <div id="emojiPicker" class="emoji-picker">
+        <!-- The emoji picker will be populated by the API -->
+    </div>
 
     <!-- Include the Socket.IO messaging and nav bar scripts -->
     <script src="messaging.js"></script>
@@ -234,6 +242,7 @@
     <script src="leave_channel.js"></script>
     <script src="nav_bar.js"></script>
     <script src="registered_users.js"></script> <!-- Include to maintain socket -->
+    <script src="emoji.js"></script> <!-- Add emoji functionality -->
 
     <script>
         // Function to redirect to the appropriate create channel page

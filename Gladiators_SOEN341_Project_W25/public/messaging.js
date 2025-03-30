@@ -426,9 +426,25 @@ function closeChat() {
     });
 }
 
+// Helper function for emoji insertion - will be used by emoji.js
+function insertTextAtCursor(input, text) {
+    const startPos = input.selectionStart;
+    const endPos = input.selectionEnd;
+    const currentValue = input.value;
+
+    const newValue = currentValue.substring(0, startPos) + text + currentValue.substring(endPos);
+    input.value = newValue;
+
+    // Move cursor after inserted text
+    const newCursorPos = startPos + text.length;
+    input.setSelectionRange(newCursorPos, newCursorPos);
+    input.focus();
+}
+
 // Export functions for use in other files
 window.joinChannel = joinChannel;
 window.joinDM = joinDM;
 window.displaySystemMessage = displaySystemMessage;
 window.closeChat = closeChat;
 window.sendMessage = sendMessage; // Export for use in standalone buttons
+window.insertTextAtCursor = insertTextAtCursor; // Export for use with emoji picker
