@@ -82,7 +82,12 @@ const messageSchema = new mongoose.Schema({
     username: { type: String, required: true },
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    isDeleted: { type: Boolean, default: false } // isDeleted field for message deletion
+    isDeleted: { type: Boolean, default: false },
+    isEdited: { type: Boolean, default: false },
+    editHistory: [{
+        previousMessage: { type: String },
+        editedAt: { type: Date, default: Date.now }
+    }]
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -301,6 +306,66 @@ io.on('connection', (socket) => {
             }
         }
     }, 5 * 60 * 1000);
+
+    // Handle message editing
+    socket.on('edit message', async (data) => {
+        try {
+            const { messageId, newMessage } = data;
+            if (!messageId || !newMessage) {
+                socket.emit('error', 'Message ID and new message content are required');
+                return;
+            }
+
+            // Check if the user is the message author
+            const message = await Message.findById(messageId);
+            if (!message) {
+                socket.emit('error', 'Message not found');
+                return;
+            }
+
+            const userInfo = connectedUsers.get(socket.id);
+            if (!userInfo) {
+                socket.emit('error', 'User info not found');
+                return;
+            }
+
+            // Only allow message authors to edit their messages
+            if (message.username !== userInfo.username) {
+                socket.emit('error', 'You can only edit your own messages');
+                return;
+            }
+
+            // Store the previous message in history
+            const historyEntry = {
+                previousMessage: message.message,
+                editedAt: new Date()
+            };
+
+            // Update the message in the database
+            const updatedMessage = await Message.findByIdAndUpdate(
+                messageId,
+                {
+                    message: newMessage,
+                    isEdited: true,
+                    $push: { editHistory: historyEntry }
+                },
+                { new: true }
+            );
+
+            // Broadcast the edit to all users in the channel
+            io.to(message.channelId.toString()).emit('message edited', {
+                messageId: updatedMessage._id,
+                newMessage: updatedMessage.message,
+                isEdited: true,
+                editHistory: updatedMessage.editHistory
+            });
+
+            console.log('Message edited successfully:', messageId);
+        } catch (error) {
+            console.error('Error editing message:', error);
+            socket.emit('error', 'Failed to edit message');
+        }
+    });
 
     socket.on('disconnect', () => {
         clearTimeout(awayTimeout);
@@ -680,6 +745,26 @@ app.get("/all-channels-with-status", authenticate, async (req, res) => {
     } catch (error) {
         console.error("Error fetching all channels with status:", error);
         res.status(500).json({ error: "Failed to fetch channels" });
+    }
+});
+
+// Message History
+app.get('/message/history/:messageId', authenticate, async (req, res) => {
+    try {
+        const { messageId } = req.params;
+        const message = await Message.findById(messageId).lean();
+
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        res.json({
+            message: message.message,
+            editHistory: message.editHistory || []
+        });
+    } catch (error) {
+        console.error('Error fetching message history:', error);
+        res.status(500).json({ error: 'Failed to fetch message history' });
     }
 });
 

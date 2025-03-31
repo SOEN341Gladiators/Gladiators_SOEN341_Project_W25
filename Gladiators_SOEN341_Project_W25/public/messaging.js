@@ -3,6 +3,7 @@ let socket;
 let currentChannel = null;
 let username = localStorage.getItem('username') || 'Anonymous';
 let userRole = localStorage.getItem('userRole') || 'user';
+let editingMessageId = null; // Track which message is being edited
 
 document.addEventListener("DOMContentLoaded", function () {
     // Ensure username is set properly at initialization
@@ -111,6 +112,11 @@ document.addEventListener("DOMContentLoaded", function () {
         updateDeletedMessage(data.messageId);
     });
 
+    socket.on("message edited", (data) => {
+        console.log("Message edited:", data);
+        updateEditedMessage(data.messageId, data.newMessage, data.editHistory);
+    });
+
     socket.on("error", (error) => {
         console.error("Socket error:", error);
         displaySystemMessage("Error: " + error);
@@ -134,16 +140,58 @@ document.addEventListener("DOMContentLoaded", function () {
         const message = messageInput.value.trim();
         if (message === "") return;
 
-        const messageData = {
-            channelId: currentChannel,
-            username: username,
-            message: message
-        };
+        // Check if we're editing a message
+        if (editingMessageId) {
+            // Send edit to server
+            const editData = {
+                messageId: editingMessageId,
+                newMessage: message
+            };
+            console.log("Editing message:", editData);
+            socket.emit("edit message", editData);
 
-        console.log("Sending message:", messageData);
+            // Reset editing state
+            editingMessageId = null;
+            resetChatForm();
+        } else {
+            // Send new message
+            const messageData = {
+                channelId: currentChannel,
+                username: username,
+                message: message
+            };
+            console.log("Sending message:", messageData);
+            socket.emit("message", messageData);
+        }
 
-        socket.emit("message", messageData);
         messageInput.value = "";
+    }
+
+    // Reset the chat form after editing
+    function resetChatForm() {
+        // Change submit button text back to "Send"
+        const submitButton = document.querySelector("#chatForm button[type='submit']");
+        if (submitButton) {
+            submitButton.textContent = "Send";
+        }
+
+        // Remove cancel button if it exists
+        const cancelButton = document.getElementById("cancelEditBtn");
+        if (cancelButton) {
+            cancelButton.remove();
+        }
+
+        // Remove editing class from form
+        if (chatForm) {
+            chatForm.classList.remove("editing");
+        }
+    }
+
+    // Cancel editing
+    function cancelEdit() {
+        messageInput.value = ""; // Clear input
+        editingMessageId = null; // Reset editing state
+        resetChatForm(); // Reset form UI
     }
 
     // Event listeners for sending messages
@@ -184,6 +232,7 @@ function displayMessage(data) {
     const messageDiv = document.createElement("div");
     messageDiv.className = "message";
     messageDiv.id = `message-${data._id}`;
+    messageDiv.dataset.originalMessage = data.message; // Store original message for editing
 
     // Get current username and role again to ensure it's up to date
     const currentUsername = localStorage.getItem('username') || 'Anonymous';
@@ -217,19 +266,33 @@ function displayMessage(data) {
             <div class="message-timestamp">${timestamp}</div>
         `;
 
-        // Only add delete option if user is an admin
-        if (currentUserRole === 'admin') {
-            const actionsDiv = document.createElement("div");
-            actionsDiv.className = "message-actions";
-            actionsDiv.textContent = "⋮";
-            actionsDiv.addEventListener("click", (e) => {
+        // Add message actions (three dots) menu
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "message-actions";
+        actionsDiv.textContent = "⋮";
+        actionsDiv.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleDropdown(data._id);
+        });
+
+        const dropdownDiv = document.createElement("div");
+        dropdownDiv.className = "Dropdown-menu";
+
+        // Only add edit option for own messages
+        if (isOwnMessage && !data.isDeleted) {
+            const editOption = document.createElement("div");
+            editOption.className = "edit-option";
+            editOption.textContent = "Edit message";
+            editOption.addEventListener("click", (e) => {
                 e.stopPropagation();
-                toggleDropdown(data._id);
+                editMessage(data._id);
+                dropdownDiv.classList.remove("show");
             });
+            dropdownDiv.appendChild(editOption);
+        }
 
-            const dropdownDiv = document.createElement("div");
-            dropdownDiv.className = "Dropdown-menu";
-
+        // Admin (or own message) can delete
+        if (currentUserRole === 'admin' || isOwnMessage) {
             const deleteOption = document.createElement("div");
             deleteOption.className = "delete-option";
             deleteOption.textContent = "Delete message";
@@ -238,17 +301,38 @@ function displayMessage(data) {
                 deleteMessage(data._id);
                 dropdownDiv.classList.remove("show");
             });
-
             dropdownDiv.appendChild(deleteOption);
-            messageDiv.appendChild(actionsDiv);
-            messageDiv.appendChild(dropdownDiv);
         }
+
+        // Add history option for edited messages
+        if (data.isEdited) {
+            const historyOption = document.createElement("div");
+            historyOption.className = "history-option";
+            historyOption.textContent = "View edit history";
+            historyOption.addEventListener("click", (e) => {
+                e.stopPropagation();
+                viewMessageHistory(data._id);
+                dropdownDiv.classList.remove("show");
+            });
+            dropdownDiv.appendChild(historyOption);
+        }
+
+        messageDiv.appendChild(actionsDiv);
+        messageDiv.appendChild(dropdownDiv);
     }
 
     // Add username display at the top
     const usernameSpan = document.createElement("span");
     usernameSpan.className = "message-username";
     usernameSpan.textContent = data.username;
+
+    // Add edited indicator if message was edited
+    if (data.isEdited) {
+        const editedSpan = document.createElement("span");
+        editedSpan.className = "edited-indicator";
+        editedSpan.textContent = " (edited)";
+        usernameSpan.appendChild(editedSpan);
+    }
 
     messageDiv.appendChild(usernameSpan);
     messageDiv.appendChild(contentDiv);
@@ -292,15 +376,244 @@ function updateDeletedMessage(messageId) {
     }
 }
 
+function updateEditedMessage(messageId, newMessage, editHistory) {
+    const messageDiv = document.getElementById(`message-${messageId}`);
+    if (!messageDiv) return;
+
+    // Update the message text
+    const messageText = messageDiv.querySelector('.message-text');
+    if (messageText) {
+        messageText.textContent = newMessage;
+    }
+
+    // Update dataset for future editing
+    messageDiv.dataset.originalMessage = newMessage;
+
+    // Add edited indicator if not already present
+    const usernameSpan = messageDiv.querySelector('.message-username');
+    if (usernameSpan && !usernameSpan.querySelector('.edited-indicator')) {
+        const editedSpan = document.createElement("span");
+        editedSpan.className = "edited-indicator";
+        editedSpan.textContent = " (edited)";
+        usernameSpan.appendChild(editedSpan);
+    }
+
+    // Make sure there's a view history option in the dropdown
+    const dropdown = messageDiv.querySelector('.Dropdown-menu');
+    if (dropdown && !dropdown.querySelector('.history-option')) {
+        const historyOption = document.createElement("div");
+        historyOption.className = "history-option";
+        historyOption.textContent = "View edit history";
+        historyOption.addEventListener("click", (e) => {
+            e.stopPropagation();
+            viewMessageHistory(messageId);
+            dropdown.classList.remove("show");
+        });
+        dropdown.appendChild(historyOption);
+    }
+}
+
+function editMessage(messageId) {
+    const messageDiv = document.getElementById(`message-${messageId}`);
+    if (!messageDiv) return;
+
+    const originalMessage = messageDiv.dataset.originalMessage;
+    const chatInput = document.getElementById("chatInput");
+    const chatForm = document.getElementById("chatForm");
+
+    if (!chatInput || !chatForm) return;
+
+    // Set the input value to the original message
+    chatInput.value = originalMessage;
+    chatInput.focus();
+
+    // Change the submit button text to "Save"
+    const submitButton = chatForm.querySelector("button[type='submit']");
+    if (submitButton) {
+        submitButton.textContent = "Save";
+    }
+
+    // Add a class to the form to indicate editing mode
+    chatForm.classList.add("editing");
+
+    // Add a cancel button if it doesn't exist
+    if (!document.getElementById("cancelEditBtn")) {
+        const cancelButton = document.createElement("button");
+        cancelButton.id = "cancelEditBtn";
+        cancelButton.type = "button";
+        cancelButton.className = "cancel-edit-btn";
+        cancelButton.textContent = "Cancel";
+        cancelButton.addEventListener("click", cancelEdit);
+
+        // Insert before the submit button
+        if (submitButton) {
+            chatForm.insertBefore(cancelButton, submitButton);
+        } else {
+            chatForm.appendChild(cancelButton);
+        }
+    }
+
+    // Set the editing state
+    editingMessageId = messageId;
+}
+
+function cancelEdit() {
+    const chatInput = document.getElementById("chatInput");
+    chatInput.value = ""; // Clear input
+    editingMessageId = null; // Reset editing state
+
+    // Reset form UI
+    const submitButton = document.querySelector("#chatForm button[type='submit']");
+    if (submitButton) {
+        submitButton.textContent = "Send";
+    }
+
+    const cancelButton = document.getElementById("cancelEditBtn");
+    if (cancelButton) {
+        cancelButton.remove();
+    }
+
+    // Remove editing class
+    const chatForm = document.getElementById("chatForm");
+    if (chatForm) {
+        chatForm.classList.remove("editing");
+    }
+}
+
+// View message edit history
+async function viewMessageHistory(messageId) {
+    try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:5000/message/history/${messageId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch message history");
+        }
+
+        const data = await response.json();
+        displayMessageHistory(messageId, data);
+    } catch (error) {
+        console.error("Error fetching message history:", error);
+        displaySystemMessage("Error: Failed to fetch message history");
+    }
+}
+
+// Display the message history modal
+function displayMessageHistory(messageId, data) {
+    // Remove any existing history modals
+    const existingModal = document.getElementById('historyModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Create modal container
+    const modal = document.createElement('div');
+    modal.id = 'historyModal';
+    modal.className = 'history-modal';
+
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'history-modal-content';
+
+    // Create header
+    const header = document.createElement('div');
+    header.className = 'history-modal-header';
+
+    const title = document.createElement('h3');
+    title.textContent = 'Message Edit History';
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'history-close-btn';
+    closeButton.textContent = '×';
+    closeButton.addEventListener('click', () => modal.remove());
+
+    header.appendChild(title);
+    header.appendChild(closeButton);
+
+    // Create body
+    const body = document.createElement('div');
+    body.className = 'history-modal-body';
+
+    // Current version
+    const currentVersion = document.createElement('div');
+    currentVersion.className = 'history-item current';
+
+    const currentHeader = document.createElement('div');
+    currentHeader.className = 'history-item-header';
+    currentHeader.innerHTML = '<strong>Current Version</strong>';
+
+    const currentText = document.createElement('div');
+    currentText.className = 'history-item-text';
+    currentText.textContent = data.message;
+
+    currentVersion.appendChild(currentHeader);
+    currentVersion.appendChild(currentText);
+    body.appendChild(currentVersion);
+
+    // Previous versions
+    if (data.editHistory && data.editHistory.length > 0) {
+        data.editHistory.slice().reverse().forEach((edit, index) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+
+            const editNumber = data.editHistory.length - index;
+            const timestamp = new Date(edit.editedAt).toLocaleString();
+
+            const itemHeader = document.createElement('div');
+            itemHeader.className = 'history-item-header';
+            itemHeader.innerHTML = `<strong>Version ${editNumber}</strong> <span class="history-timestamp">${timestamp}</span>`;
+
+            const itemText = document.createElement('div');
+            itemText.className = 'history-item-text';
+            itemText.textContent = edit.previousMessage;
+
+            historyItem.appendChild(itemHeader);
+            historyItem.appendChild(itemText);
+            body.appendChild(historyItem);
+        });
+    } else {
+        const noHistory = document.createElement('div');
+        noHistory.className = 'no-history-message';
+        noHistory.textContent = 'No previous versions found.';
+        body.appendChild(noHistory);
+    }
+
+    // Assemble modal
+    modalContent.appendChild(header);
+    modalContent.appendChild(body);
+    modal.appendChild(modalContent);
+
+    // Add to document
+    document.body.appendChild(modal);
+
+    // Add click outside to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
 function deleteMessage(messageId) {
     // Get the current user role directly from localStorage
     const currentUserRole = localStorage.getItem('userRole') || 'user';
+    const currentUsername = localStorage.getItem('username') || 'Anonymous';
 
-    console.log("Current user role when deleting:", currentUserRole);
+    // Find the message element
+    const messageDiv = document.getElementById(`message-${messageId}`);
+    if (!messageDiv) return;
 
-    // Only allow admins to delete messages
-    if (currentUserRole !== 'admin') {
-        console.log("Only admins can delete messages");
+    // Get message author
+    const messageUsername = messageDiv.querySelector('.message-username')?.textContent;
+    const isOwnMessage = messageUsername === currentUsername;
+
+    // Only allow admins or message owner to delete messages
+    if (currentUserRole !== 'admin' && !isOwnMessage) {
+        console.log("Only admins or message owners can delete messages");
         return;
     }
 
@@ -448,3 +761,4 @@ window.displaySystemMessage = displaySystemMessage;
 window.closeChat = closeChat;
 window.sendMessage = sendMessage; // Export for use in standalone buttons
 window.insertTextAtCursor = insertTextAtCursor; // Export for use with emoji picker
+window.cancelEdit = cancelEdit; // Export cancel edit function

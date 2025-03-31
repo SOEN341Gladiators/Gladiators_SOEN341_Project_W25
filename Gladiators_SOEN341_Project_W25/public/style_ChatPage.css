@@ -547,3 +547,192 @@ body.dark-theme em-emoji-picker {
     --secondary-background: #1f2937;
     --text-color: #f3f4f6;
 }
+
+/* Edit option in dropdown menu */
+.edit-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #4361ee;
+}
+
+.edit-option:hover {
+    background-color: #f8f8f8;
+}
+
+body.dark-theme .edit-option {
+    color: #738aec;
+}
+
+body.dark-theme .edit-option:hover {
+    background-color: #374151;
+}
+
+/* Cancel edit button */
+.cancel-edit-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    margin-right: 10px;
+}
+
+.cancel-edit-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Edited indicator */
+.edited-indicator {
+    font-size: 0.8em;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Change submit button color when editing */
+#chatForm.editing button[type="submit"] {
+    background-color: #28a745;
+}
+
+#chatForm.editing button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* View history option in dropdown menu */
+.history-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #17a2b8;
+}
+
+.history-option:hover {
+    background-color: #f8f8f8;
+}
+
+body.dark-theme .history-option {
+    color: #5bc0de;
+}
+
+body.dark-theme .history-option:hover {
+    background-color: #374151;
+}
+
+/* History modal */
+.history-modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.history-modal-content {
+    background-color: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #4361ee;
+    color: white;
+}
+
+.history-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.history-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.history-modal-body {
+    padding: 15px;
+    overflow-y: auto;
+    max-height: calc(90vh - 60px);
+}
+
+.history-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.history-item.current {
+    background-color: #f8f9fa;
+    border-color: #4361ee;
+}
+
+.history-item-header {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-timestamp {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.history-item-text {
+    word-break: break-word;
+}
+
+.no-history-message {
+    text-align: center;
+    color: #6c757d;
+    padding: 10px;
+    font-style: italic;
+}
+
+/* Dark theme styles for history modal */
+body.dark-theme .history-modal-content {
+    background-color: #1f2937;
+    color: #f3f4f6;
+}
+
+body.dark-theme .history-modal-header {
+    background-color: #2a3441;
+}
+
+body.dark-theme .history-item {
+    border-color: #374151;
+    background-color: #111827;
+}
+
+body.dark-theme .history-item.current {
+    background-color: #1f2937;
+    border-color: #4361ee;
+}
+
+body.dark-theme .history-timestamp {
+    color: #d1d5db;
+}
+
+body.dark-theme .no-history-message {
+    color: #d1d5db;
+}
