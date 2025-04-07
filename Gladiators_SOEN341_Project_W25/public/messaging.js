@@ -117,6 +117,10 @@ document.addEventListener("DOMContentLoaded", function () {
         updateEditedMessage(data.messageId, data.newMessage, data.editHistory);
     });
 
+    socket.on('reminder', (data) => {
+        showToast(data.message, data.channelId, data.messageId);
+    });
+
     socket.on("error", (error) => {
         console.error("Socket error:", error);
         displaySystemMessage("Error: " + error);
@@ -278,6 +282,15 @@ function displayMessage(data) {
         const dropdownDiv = document.createElement("div");
         dropdownDiv.className = "Dropdown-menu";
 
+        const setReminderOption = document.createElement('div');
+        setReminderOption.className = 'set-reminder-option';
+        setReminderOption.textContent = 'Set reminder';
+        setReminderOption.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showReminderModal(data._id, data.channelId);
+            dropdownDiv.classList.remove('show');
+        });
+
         // Only add edit option for own messages
         if (isOwnMessage && !data.isDeleted) {
             const editOption = document.createElement("div");
@@ -317,6 +330,7 @@ function displayMessage(data) {
             dropdownDiv.appendChild(historyOption);
         }
 
+        dropdownDiv.appendChild(setReminderOption);
         messageDiv.appendChild(actionsDiv);
         messageDiv.appendChild(dropdownDiv);
     }
@@ -478,6 +492,187 @@ function cancelEdit() {
     if (chatForm) {
         chatForm.classList.remove("editing");
     }
+}
+
+// Modal for users to select a reminder time
+function showReminderModal(messageId, channelId) {
+    console.log(`Showing reminder modal for message ${messageId}, channel ${channelId}`);
+    const modal = document.createElement("div");
+    modal.className = "reminder-modal";
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>Set Reminder</h3>
+            <div class="reminder-options">
+                <button onclick="setReminder('${messageId}', '${channelId}', '5 min')">In 5 minutes</button>
+                <button onclick="setReminder('${messageId}', '${channelId}', '30 min')">In 30 minutes</button>
+                <button onclick="setReminder('${messageId}', '${channelId}', '1 hour')">In 1 hour</button>
+                <div class="custom-time">
+                    <input type="datetime-local" id="customReminderTime" placeholder="Custom time">
+                    <button onclick="setCustomReminder('${messageId}', '${channelId}')">Set Custom</button>
+                </div>
+            </div>
+            <button class="close-btn" onclick="this.closest('.reminder-modal').remove()">Close</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+function setReminder(messageId, channelId, timeOption) {
+    let reminderTime;
+    const now = new Date();
+    switch (timeOption) {
+        case "5 min":
+            reminderTime = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes
+            break;
+        case "30 min":
+            reminderTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes
+            break;
+        case "1 hour":
+            reminderTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour
+            break;
+        default:
+            console.error("Invalid time option:", timeOption);
+            return;
+    }
+
+    sendReminderRequest(messageId, channelId, reminderTime);
+}
+
+function setCustomReminder(messageId, channelId) {
+    const customTimeInput = document.getElementById("customReminderTime");
+    const customTimeValue = customTimeInput.value;
+
+    if (!customTimeValue) {
+        alert("Please select a custom time");
+        return;
+    }
+
+    const reminderTime = new Date(customTimeValue);
+    const now = new Date();
+
+    if (reminderTime <= now) {
+        alert("Custom time must be in the future");
+        return;
+    }
+
+    sendReminderRequest(messageId, channelId, reminderTime);
+}
+
+function sendReminderRequest(messageId, channelId, reminderTime) {
+    fetch("http://localhost:5000/reminder", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ messageId, channelId, reminderTime })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert("Reminder set successfully");
+            document.querySelector(".reminder-modal").remove(); // Close modal on success
+        } else {
+            alert("Failed to set reminder");
+        }
+    })
+    .catch(error => {
+        console.error("Error setting reminder:", error);
+        alert("Failed to set reminder");
+    });
+}
+
+//Display clickable toast notifications when reminders trigger
+function showToast(message, channelId, messageId) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toast.addEventListener('click', () => {
+        switchChannel(channelId);
+        setTimeout(() => {
+            const messageElement = document.getElementById(`message-${messageId}`);
+            if (messageElement) messageElement.scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+    });
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+}
+
+// Display the reminders modal
+document.getElementById('viewRemindersBtn').addEventListener('click', showRemindersModal);
+
+function showRemindersModal() {
+    fetch('http://localhost:5000/reminders', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    })
+    .then(response => response.json())
+    .then(reminders => {
+        const modal = document.createElement('div');
+        modal.className = 'reminders-modal';
+        let html = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>My Reminders</h3>
+                    <button class="close-btn" aria-label="Close reminders modal">×</button>
+                </div>
+                <div class="reminders-body">
+        `;
+        if (reminders.length === 0) {
+            html += '<p class="no-reminders">No reminders set yet</p>';
+        } else {
+            html += '<ul class="reminders-list">';
+            reminders.forEach(reminder => {
+                const message = reminder.messageId;
+                const time = new Date(reminder.reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                html += `
+                    <li class="reminder-item">
+                        <span class="reminder-message">${message.username}: ${message.message}</span>
+                        <span class="reminder-time">${time}</span>
+                        <button class="cancel-reminder-btn" onclick="cancelReminder('${reminder._id}')">×</button>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+        }
+        html += '</div></div>';
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+
+        const closeBtn = modal.querySelector('.close-btn');
+        closeBtn.addEventListener('click', () => modal.remove());
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching reminders:', error);
+        alert('Failed to fetch reminders');
+    });
+}
+
+function cancelReminder(reminderId) {
+    fetch(`http://localhost:5000/reminder/${reminderId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) alert('Reminder canceled successfully');
+        else alert('Failed to cancel reminder');
+    })
+    .catch(error => {
+        console.error('Error canceling reminder:', error);
+        alert('Failed to cancel reminder');
+    });
+    const reminderElement = document.querySelector(`li:has(button[onclick="cancelReminder('${reminderId}')"])`);
+    if (reminderElement) reminderElement.remove();
 }
 
 // View message edit history

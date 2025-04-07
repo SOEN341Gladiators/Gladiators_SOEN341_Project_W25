@@ -92,6 +92,17 @@ const messageSchema = new mongoose.Schema({
 
 const Message = mongoose.model('Message', messageSchema);
 
+// Reminder Schema
+const reminderSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    messageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: true },
+    channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', required: true },
+    reminderTime: { type: Date, required: true },
+    status: { type: String, enum: ['pending', 'sent', 'canceled'], default: 'pending' }
+});
+
+const Reminder = mongoose.model('Reminder', reminderSchema);
+
 // Store connected users and their roles
 const connectedUsers = new Map();
 
@@ -131,6 +142,7 @@ io.on('connection', (socket) => {
                 console.log('Emitting userList on user info:', users.length, 'users');
                 io.emit('userList', users);
                 console.log('Successfully emitted userList on user info:', users.length, 'users');
+                socket.join(user._id.toString());
             } catch (error) {
                 console.error('Error in user info:', error);
                 socket.emit('error', 'Failed to update user status');
@@ -768,6 +780,18 @@ app.get('/message/history/:messageId', authenticate, async (req, res) => {
     }
 });
 
+app.get('/reminders', authenticate, async (req, res) => {
+    try {
+        const reminders = await Reminder.find({ userId: req.user.id, status: 'pending' })
+            .populate('messageId', 'username message')
+            .populate('channelId', 'name');
+        res.json(reminders);
+    } catch (error) {
+        console.error('Error fetching reminders:', error);
+        res.status(500).json({ error: 'Failed to fetch reminders' });
+    }
+});
+
 //******************************POST Methods************************************//
 
 // 1. Register a New User
@@ -1276,6 +1300,46 @@ app.post("/channel/leave/:channelId", authenticate, async (req, res) => {
     }
 });
 
+app.post('/reminder', authenticate, async (req, res) => {
+    const { messageId, channelId, reminderTime } = req.body;
+    if (!messageId || !channelId || !reminderTime) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        const reminder = new Reminder({
+            userId: req.user.id,
+            messageId,
+            channelId,
+            reminderTime: new Date(reminderTime),
+            status: 'pending'
+        });
+        await reminder.save();
+        res.status(201).json({ message: 'Reminder set successfully' });
+    } catch (error) {
+        console.error('Error setting reminder:', error);
+        res.status(500).json({ error: 'Failed to set reminder' });
+    }
+});
+
+//******************************DELETE Methods************************************//
+
+app.delete('/reminder/:id', authenticate, async (req, res) => {
+    try {
+        const reminder = await Reminder.findOneAndUpdate(
+            { _id: req.params.id, userId: req.user.id, status: 'pending' },
+            { status: 'canceled' },
+            { new: true }
+        );
+        if (!reminder) {
+            return res.status(404).json({ error: 'Reminder not found or already processed' });
+        }
+        res.json({ message: 'Reminder canceled successfully' });
+    } catch (error) {
+        console.error('Error canceling reminder:', error);
+        res.status(500).json({ error: 'Failed to cancel reminder' });
+    }
+});
+
 // Catch-all 404 route handler - place at the end
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" }); // Error 404 Page
@@ -1327,4 +1391,27 @@ server.listen(PORT, () => {
 
     // Initialize default channels when server starts
     initializeDefaultChannels();
+
+    // Start reminder checking
+    setInterval(async () => {
+        try {
+            const now = new Date();
+            const dueReminders = await Reminder.find({
+                reminderTime: { $lte: now },
+                status: 'pending'
+            }).populate('messageId', 'username message');
+            for (const reminder of dueReminders) {
+                const userId = reminder.userId.toString();
+                const message = reminder.messageId;
+                io.to(userId).emit('reminder', {
+                    message: `Reminder: ${message.username} said "${message.message}"`,
+                    channelId: reminder.channelId,
+                    messageId: reminder.messageId
+                });
+                await Reminder.updateOne({ _id: reminder._id }, { status: 'sent' });
+            }
+        } catch (error) {
+            console.error('Error processing reminders:', error);
+        }
+    }, 60000); // Every minute
 });
