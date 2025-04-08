@@ -87,7 +87,8 @@ const messageSchema = new mongoose.Schema({
     editHistory: [{
         previousMessage: { type: String },
         editedAt: { type: Date, default: Date.now }
-    }]
+    }],
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null } // New field for reply
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -179,6 +180,7 @@ io.on('connection', (socket) => {
             const messages = await Message.find({ channelId })
                 .sort({ timestamp: -1 })
                 .limit(50)
+                .populate('replyTo', '_id username message timestamp') // Populate replyTo details
                 .lean();
 
             // Send message history to the user
@@ -192,10 +194,22 @@ io.on('connection', (socket) => {
     // Handle new messages
     socket.on('message', async (data) => {
         try {
-            const { channelId, username, message } = data;
+            const { channelId, username, message, replyTo } = data;
 
             // Log incoming message data
             console.log('Received message:', data);
+
+            // If replyTo is provided, validate it exists in the same channel
+            let replyToData = null;
+            if (replyTo) {
+                replyToData = await Message.findOne({ _id: replyTo, channelId })
+                    .select('username message timestamp isDeleted')
+                    .lean();
+                if (!replyToData) {
+                    socket.emit('error', 'Original message not found or not in this channel');
+                    return;
+                }
+            }
 
             // Save message to database
             const newMessage = new Message({
@@ -203,7 +217,8 @@ io.on('connection', (socket) => {
                 username,
                 message,
                 timestamp: new Date(),
-                isDeleted: false // Initialize as not deleted
+                isDeleted: false, // Initialize as not deleted
+                replyTo: replyTo || null // Include replyTo if provided
             });
             await newMessage.save();
 
@@ -213,7 +228,8 @@ io.on('connection', (socket) => {
                 username,
                 message,
                 timestamp: newMessage.timestamp,
-                isDeleted: false
+                isDeleted: false,
+                replyTo: replyToData// Include replyTo in the broadcast
             });
 
             // Log successful broadcast
@@ -679,6 +695,7 @@ app.get('/messages/:channelId', authenticate, async (req, res) => {
         const messages = await Message.find({ channelId: req.params.channelId })
             .sort({ timestamp: -1 })
             .limit(50)
+            .populate('replyTo', '_id username message timestamp') // Populate replyTo details
             .lean();
         res.json(messages.reverse());
     } catch (error) {

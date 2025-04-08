@@ -4,6 +4,7 @@ let currentChannel = null;
 let username = localStorage.getItem('username') || 'Anonymous';
 let userRole = localStorage.getItem('userRole') || 'user';
 let editingMessageId = null; // Track which message is being edited
+let replyingTo = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     // Ensure username is set properly at initialization
@@ -153,6 +154,12 @@ document.addEventListener("DOMContentLoaded", function () {
             };
             console.log("Editing message:", editData);
             socket.emit("edit message", editData);
+            const messageData = {
+                channelId: currentChannel,
+                username: username,
+                message: message,
+                replyTo: replyingTo || undefined
+            };
 
             // Reset editing state
             editingMessageId = null;
@@ -169,6 +176,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         messageInput.value = "";
+        if (replyingTo) {
+            document.getElementById('replyIndicator').style.display = 'none';
+            document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+            replyingTo = null;
+        }
     }
 
     // Reset the chat form after editing
@@ -221,6 +233,15 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // Add event listener for canceling the reply
+    document.getElementById('cancelReply').addEventListener('click', () => {
+        const replyIndicator = document.getElementById('replyIndicator');
+        replyIndicator.classList.remove('show'); // Start fade-out
+        replyIndicator.style.display = 'none'; // Hide after animation
+        document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+        replyingTo = null; // Clear reply state
+    });
 });
 
 // Helper functions
@@ -238,6 +259,12 @@ function displayMessage(data) {
     messageDiv.id = `message-${data._id}`;
     messageDiv.dataset.originalMessage = data.message; // Store original message for editing
 
+    // Add reply button
+    const replyButton = document.createElement("button");
+    replyButton.className = "reply-button";
+    replyButton.textContent = "Reply";
+    replyButton.addEventListener("click", () => initiateReply(data._id));
+
     // Get current username and role again to ensure it's up to date
     const currentUsername = localStorage.getItem('username') || 'Anonymous';
     const currentUserRole = localStorage.getItem('userRole') || 'user';
@@ -253,6 +280,29 @@ function displayMessage(data) {
     }
 
     const timestamp = new Date(data.timestamp).toLocaleTimeString();
+
+    //check if the message is a reply
+    if (data.replyTo) {
+        const repliedMessageDiv = document.createElement("div");
+        repliedMessageDiv.className = "replied-message";
+
+        // Use populated replyTo data from the server
+        if (data.replyTo && typeof data.replyTo === 'object' && data.replyTo.message) {
+            const originalUsername = data.replyTo.username;
+            const originalMessageText = data.replyTo.isDeleted ? "🚫 This message has been deleted" : data.replyTo.message;
+            repliedMessageDiv.innerHTML = `<strong>${originalUsername}:</strong> ${originalMessageText}`;
+        } else {
+            repliedMessageDiv.textContent = "Original message not found";
+        }
+
+        repliedMessageDiv.addEventListener("click", () => {
+            const original = document.getElementById(`message-${data.replyTo._id || data.replyTo}`);
+            if (original) {
+                original.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+        messageDiv.appendChild(repliedMessageDiv);
+    }
 
     // Create message content
     const contentDiv = document.createElement("div");
@@ -350,9 +400,36 @@ function displayMessage(data) {
 
     messageDiv.appendChild(usernameSpan);
     messageDiv.appendChild(contentDiv);
+    messageDiv.appendChild(replyButton);
 
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function initiateReply(messageId) {
+    replyingTo = messageId; // Store the message ID being replied to
+    document.getElementById("replyIndicator").style.display = "block"; // Show reply indicator
+    document.getElementById("replyIndicator").style.opacity = 1; // Show reply indicator
+    
+    const originalMessageDiv = document.getElementById(`message-${messageId}`);
+    if (!originalMessageDiv) {
+        console.error("Original message not found");
+        return;
+    }
+    if (originalMessageDiv.querySelector('.message-text').classList.contains('deleted')) {
+        console.log("Cannot reply to a deleted message");
+        return;
+    }
+    // Remove existing highlights
+    document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+    originalMessageDiv.classList.add('replying-to');
+
+    const username = originalMessageDiv.querySelector('.message-username').textContent;
+    const messageText = originalMessageDiv.querySelector('.message-text').textContent;
+    const preview = messageText.length > 20 ? messageText.substring(0, 20) + '...' : messageText;
+
+    const replyText = `Replying to ${username}: ${preview}`;
+    document.getElementById('replyText').textContent = replyText;
 }
 
 function toggleDropdown(messageId) {
@@ -387,6 +464,12 @@ function updateDeletedMessage(messageId) {
             messageText.classList.add('deleted');
             messageText.textContent = '🚫 This message has been deleted';
         }
+    }
+
+    if (replyingTo === messageId) {
+        document.getElementById('replyIndicator').style.display = 'none';
+        document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+        replyingTo = null;
     }
 }
 
@@ -848,6 +931,10 @@ function joinChannel(channelId) {
     currentChannel = channelId;
     socket.emit("join channel", channelId);
 
+    replyingTo = null;
+    document.getElementById('replyIndicator').style.display = 'none';
+    document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+
     // Show chat area and hide welcome text
     const chatArea = document.getElementById("chatArea");
     const welcomeText = document.getElementById("welcomeText");
@@ -887,6 +974,10 @@ async function joinDM(recipientUsername) {
         currentChannel = dmChannelId;
         socket.emit("join channel", dmChannelId);
 
+        replyingTo = null;
+        document.getElementById('replyIndicator').style.display = 'none';
+        document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+
         // Show chat area and hide welcome text
         const chatArea = document.getElementById("chatArea");
         const welcomeText = document.getElementById("welcomeText");
@@ -917,6 +1008,10 @@ function closeChat() {
         socket.emit("leave channel", currentChannel);
         currentChannel = null;
     }
+
+    replyingTo = null;
+    document.getElementById('replyIndicator').style.display = 'none';
+    document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
 
     if (chatArea) chatArea.style.display = "none";
     if (welcomeText) welcomeText.style.display = "block";
