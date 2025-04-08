@@ -128,60 +128,57 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Send message functionality
-    function sendMessage(e) {
-        if (e) e.preventDefault(); // Prevent form submission if event is provided
+function sendMessage(e) {
+    if (e) e.preventDefault(); // Prevent form submission if event is provided
 
-        // Always refresh username from localStorage before sending
-        username = localStorage.getItem('username') || 'Anonymous';
+    // Always refresh username from localStorage before sending
+    username = localStorage.getItem('username') || 'Anonymous';
 
-        if (!messageInput || !currentChannel) {
-            console.log("Cannot send message - missing input or channel", {
-                messageInput: !!messageInput,
-                currentChannel
-            });
-            return;
-        }
-
-        const message = messageInput.value.trim();
-        if (message === "") return;
-
-        // Check if we're editing a message
-        if (editingMessageId) {
-            // Send edit to server
-            const editData = {
-                messageId: editingMessageId,
-                newMessage: message
-            };
-            console.log("Editing message:", editData);
-            socket.emit("edit message", editData);
-            const messageData = {
-                channelId: currentChannel,
-                username: username,
-                message: message,
-                replyTo: replyingTo || undefined
-            };
-
-            // Reset editing state
-            editingMessageId = null;
-            resetChatForm();
-        } else {
-            // Send new message
-            const messageData = {
-                channelId: currentChannel,
-                username: username,
-                message: message
-            };
-            console.log("Sending message:", messageData);
-            socket.emit("message", messageData);
-        }
-
-        messageInput.value = "";
-        if (replyingTo) {
-            document.getElementById('replyIndicator').style.display = 'none';
-            document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
-            replyingTo = null;
-        }
+    if (!messageInput || !currentChannel) {
+        console.log("Cannot send message - missing input or channel", {
+            messageInput: !!messageInput,
+            currentChannel
+        });
+        return;
     }
+
+    const message = messageInput.value.trim();
+    if (message === "") return;
+
+    // Check if we're editing a message
+    if (editingMessageId) {
+        // Send edit to server
+        const editData = {
+            messageId: editingMessageId,
+            newMessage: message
+        };
+        console.log("Editing message:", editData);
+        socket.emit("edit message", editData);
+        // Removed unused messageData object
+
+        // Reset editing state
+        editingMessageId = null;
+        resetChatForm();
+    } else {
+        // Send new message
+        const messageData = {
+            channelId: currentChannel,
+            username: username,
+            message: message,
+            replyTo: replyingTo || undefined // Include replyTo if set
+        };
+        console.log("Sending message:", messageData);
+        socket.emit("message", messageData);
+    }
+
+    messageInput.value = "";
+    if (replyingTo) {
+        const replyIndicator = document.getElementById('replyIndicator');
+        if (replyIndicator) replyIndicator.style.display = 'none';
+        document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+        replyingTo = null;
+    }
+}
 
     // Reset the chat form after editing
     function resetChatForm() {
