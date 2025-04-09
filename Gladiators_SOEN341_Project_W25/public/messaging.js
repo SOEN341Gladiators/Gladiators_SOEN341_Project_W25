@@ -93,11 +93,13 @@ function closeChat() {
     }
 }
 
+/* remove this fix es lint error
 // Helper function to generate a unique DM channel ID
 function generateDMChannelId(userA, userB) {
     // Sort the usernames to ensure consistency (e.g., "Alice_Bob")
     return [userA, userB].sort().join('_');
 }
+*/
 
 // Standalone function to join a direct message channel
 async function joinDM(recipientUsername) {
