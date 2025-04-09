@@ -1,8 +1,11 @@
+/* global io */
+
 // Initialize global variables
 let socket;
 let currentChannel = null;
 let username = typeof localStorage !== 'undefined' ? localStorage.getItem('username') || 'Anonymous' : 'Anonymous'; //allow for testing
 let userRole = typeof localStorage !== 'undefined' ? localStorage.getItem('userRole') || 'user' : 'user';
+
 
 // Declare these functions in the global scope so they can be exported
 function displaySystemMessage(message) {

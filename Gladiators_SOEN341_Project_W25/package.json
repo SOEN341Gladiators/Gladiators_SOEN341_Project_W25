@@ -12,7 +12,7 @@
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.7.0",
     "mongodb-memory-server": "^10.1.4",
-    "socket.io": "^4.5.4",
+    "socket.io": "^4.8.1",
     "supertest": "^7.0.0"
   },
   "scripts": {
@@ -20,19 +20,22 @@
     "test": "jest",
     "build": "echo \"No build process specified\""
   },
-    "jest": {
-      "projects": [
-        {
-          "displayName": "backend test",
-          "testEnvironment": "node",
-          "testMatch": ["**/server.test.js"]
-        },
-        {
-          "displayName": "frontend tests",
-          "testEnvironment": "jsdom",
-          "testMatch": ["**/public/**/*.test.js"]
-        }
-      ]
-    }
+  "jest": {
+    "projects": [
+      {
+        "displayName": "backend test",
+        "testEnvironment": "node",
+        "testMatch": [
+          "**/server.test.js"
+        ]
+      },
+      {
+        "displayName": "frontend tests",
+        "testEnvironment": "jsdom",
+        "testMatch": [
+          "**/public/**/*.test.js"
+        ]
+      }
+    ]
   }
-  
+}
