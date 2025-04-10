@@ -52,6 +52,10 @@ document.addEventListener("DOMContentLoaded", function () {
             role: currentUserRole
         });
 
+        setTimeout(() => {
+            console.log("Client rooms:", socket.rooms);
+        }, 1000); // Wait 1s for join to complete
+
         displaySystemMessage("Connected to chat server");
 
         // Handle channel join from localStorage (e.g., from channel list)
@@ -119,6 +123,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     socket.on('reminder', (data) => {
+        console.log("Received 'reminder' event:", data);
         showToast(data.message, data.channelId, data.messageId);
     });
 
@@ -670,18 +675,66 @@ function sendReminderRequest(messageId, channelId, reminderTime) {
 
 //Display clickable toast notifications when reminders trigger
 function showToast(message, channelId, messageId) {
+    console.log("Showing toast with:", { message, channelId, messageId });
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.textContent = message;
+
+    // Enhanced inline styling
+    toast.style.position = 'fixed';
+    toast.style.bottom = '30px'; // Slightly higher for better visibility
+    toast.style.right = '30px';
+    toast.style.backgroundColor = '#1a1a1a'; // Darker, sleek background
+    toast.style.color = '#ffffff'; // Clean white text
+    toast.style.padding = '12px 20px'; // More padding for comfort
+    toast.style.borderRadius = '8px'; // Softer corners
+    toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)'; // Subtle shadow for depth
+    toast.style.fontSize = '16px'; // Readable text size
+    toast.style.fontFamily = 'Arial, sans-serif'; // Clean font
+    toast.style.zIndex = '1000'; // Ensure it’s on top
+    toast.style.cursor = 'pointer'; // Indicate clickability
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease'; // Smooth fade and slide
+    toast.style.opacity = '0'; // Start invisible for animation
+    toast.style.transform = 'translateY(20px)'; // Start slightly below for slide-in
+
+    // Append to body and trigger animation
+    document.body.appendChild(toast);
+    console.log("Toast appended to body:", toast.outerHTML);
+    setTimeout(() => {
+        toast.style.opacity = '1'; // Fade in
+        toast.style.transform = 'translateY(0)'; // Slide up
+    }, 10); // Small delay to ensure transition works
+
+    // Hover effect
+    toast.addEventListener('mouseover', () => {
+        toast.style.backgroundColor = '#2a2a2a'; // Slightly lighter on hover
+        toast.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.4)'; // Larger shadow
+    });
+    toast.addEventListener('mouseout', () => {
+        toast.style.backgroundColor = '#1a1a1a'; // Revert to original
+        toast.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+    });
+
+    // Click functionality
     toast.addEventListener('click', () => {
-        switchChannel(channelId);
+        console.log("Toast clicked, joining:", channelId);
+        joinChannel(channelId);
         setTimeout(() => {
             const messageElement = document.getElementById(`message-${messageId}`);
             if (messageElement) messageElement.scrollIntoView({ behavior: 'smooth' });
         }, 500);
+        toast.remove(); // Remove immediately on click
     });
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 5000);
+
+    // Fade out and remove after 5 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0'; // Fade out
+        toast.style.transform = 'translateY(20px)'; // Slide down
+        setTimeout(() => {
+            console.log("Removing toast:", message);
+            toast.remove();
+        }, 300); // Wait for fade-out animation to finish
+    }, 8000);
 }
 
 // Display the reminders modal

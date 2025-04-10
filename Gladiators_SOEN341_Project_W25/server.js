@@ -1413,19 +1413,24 @@ server.listen(PORT, () => {
     setInterval(async () => {
         try {
             const now = new Date();
+            console.log("Checking reminders at:", now);
             const dueReminders = await Reminder.find({
                 reminderTime: { $lte: now },
                 status: 'pending'
             }).populate('messageId', 'username message');
+            console.log("Found due reminders:", dueReminders.length, dueReminders);
             for (const reminder of dueReminders) {
                 const userId = reminder.userId.toString();
                 const message = reminder.messageId;
-                io.to(userId).emit('reminder', {
+                const reminderData = {
                     message: `Reminder: ${message.username} said "${message.message}"`,
                     channelId: reminder.channelId,
                     messageId: reminder.messageId
-                });
+                };
+                console.log("Emitting 'reminder' to user:", userId, "with data:", reminderData);
+                io.to(userId).emit('reminder', reminderData);
                 await Reminder.updateOne({ _id: reminder._id }, { status: 'sent' });
+                console.log("Updated reminder to 'sent':", reminder._id);
             }
         } catch (error) {
             console.error('Error processing reminders:', error);
