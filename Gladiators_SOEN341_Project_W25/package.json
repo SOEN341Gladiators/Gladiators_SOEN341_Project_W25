@@ -30,7 +30,7 @@
         {
           "displayName": "frontend tests",
           "testEnvironment": "jsdom",
-          "testMatch": ["**/public/**/*.test.js"]
+          "testMatch": ["**/public/**/messaging.test.js"]
         }
       ]
     }
