@@ -1,141 +1,15 @@
 // Initialize global variables
 let socket;
 let currentChannel = null;
-
-let username = typeof localStorage !== 'undefined' ? localStorage.getItem('username') || 'Anonymous' : 'Anonymous'; //allow for testing
-let userRole = typeof localStorage !== 'undefined' ? localStorage.getItem('userRole') || 'user' : 'user';
+let username = localStorage.getItem('username') || 'Anonymous';
+let userRole = localStorage.getItem('userRole') || 'user';
 let editingMessageId = null; // Track which message is being edited
 let replyingTo = null;
 
-// Declare these functions in the global scope so they can be exported
-function displaySystemMessage(message) {
-    const chatMessages = document.getElementById("chatMessages");
-    if (!chatMessages) {
-        console.error("Chat messages container not found");
-        return;
-    }
-
-    console.log("Displaying system message:", message);
-
-    const messageDiv = document.createElement("div");
-    messageDiv.className = "message system-message";
-    messageDiv.textContent = message;
-
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function sendMessage(e) {
-    if (e) e.preventDefault(); // Prevent form submission if event is provided
-
-    // Always refresh username from localStorage before sending
-    username = localStorage.getItem('username') || 'Anonymous';
-
-    const messageInput = document.getElementById("chatInput");
-    if (!messageInput || !currentChannel) {
-        console.log("Cannot send message - missing input or channel", {
-            messageInput: !!messageInput,
-            currentChannel
-        });
-        return;
-    }
-
-    const message = messageInput.value.trim();
-    if (message === "") return;
-
-    const messageData = {
-        channelId: currentChannel,
-        username: username,
-        message: message
-    };
-
-    console.log("Sending message:", messageData);
-
-    if (socket) socket.emit("message", messageData); //if active socket, "if" for tests
-    messageInput.value = "";
-}
-
-function joinChannel(channelId) {
-    if (!channelId) {
-        console.error("Invalid channel ID provided");
-        return;
-    }
-
-    if (currentChannel === channelId) {
-        console.log("Already in channel:", channelId);
-        return;
-    }
-
-    console.log("Joining channel:", channelId);
-    currentChannel = channelId;
-    if (socket) socket.emit("join channel", channelId);
-    displaySystemMessage(`Joined channel ${channelId}`);
-}
-
-function closeChat() {
-    const chatArea = document.getElementById("chatArea");
-    const welcomeText = document.getElementById("welcomeText");
-    const startConversationText = document.getElementById("startConversationText");
-
-    if (currentChannel) {
-        if (socket) socket.emit("leave channel", currentChannel);
-        currentChannel = null;
-    }
-
-    if (chatArea) chatArea.style.display = "none";
-    if (welcomeText) welcomeText.style.display = "block";
-    if (startConversationText) startConversationText.style.display = "block";
-
-    // Clear the chat messages
-    const chatMessages = document.getElementById("chatMessages");
-    if (chatMessages) {
-        chatMessages.innerHTML = '';
-    }
-}
-
-// Helper function to generate a unique DM channel ID
-function generateDMChannelId(userA, userB) {
-    // Sort the usernames to ensure consistency (e.g., "Alice_Bob")
-    return [userA, userB].sort().join('_');
-}
-
-// Standalone function to join a direct message channel
-async function joinDM(recipientUsername) {
-    if (!recipientUsername) {
-        console.error("Recipient username is required to join DM");
-        return;
-    }
-    try {
-        const token = localStorage.getItem("token");
-        // Call the DM endpoint to get a valid DM channel ObjectId
-        const response = await fetch(`http://localhost:5000/dm-channel?recipient=${recipientUsername}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        if (!response.ok) {
-            throw new Error("Failed to get DM channel");
-        }
-        const data = await response.json();
-        const dmChannelId = data.channelId;
-        if (currentChannel === dmChannelId) {
-            console.log("Already in DM channel:", dmChannelId);
-            return;
-        }
-        console.log("Joining DM channel:", dmChannelId);
-        currentChannel = dmChannelId;
-        if (socket) socket.emit("join channel", dmChannelId);
-        displaySystemMessage(`Joined DM with ${recipientUsername}`);
-    } catch (error) {
-        console.error("Error joining DM:", error);
-    }
-}
-
-//if (typeof document !== "undefined") {
 document.addEventListener("DOMContentLoaded", function () {
     // Ensure username is set properly at initialization
-    username = typeof localStorage !== 'undefined' ? localStorage.getItem('username') || 'Anonymous' : 'Anonymous';
-    userRole = typeof localStorage !== 'undefined' ? localStorage.getItem('userRole') || 'user' : 'user';
+    username = localStorage.getItem('username') || 'Anonymous';
+    userRole = localStorage.getItem('userRole') || 'user';
     console.log("Current username:", username);
     console.log("Current user role:", userRole);
 
@@ -258,86 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
         displaySystemMessage("Error: " + error);
     });
 
-    // Send message functionality
-function sendMessage(e) {
-    if (e) e.preventDefault(); // Prevent form submission if event is provided
 
-    // Always refresh username from localStorage before sending
-    username = localStorage.getItem('username') || 'Anonymous';
-
-    if (!messageInput || !currentChannel) {
-        console.log("Cannot send message - missing input or channel", {
-            messageInput: !!messageInput,
-            currentChannel
-        });
-        return;
-    }
-
-    const message = messageInput.value.trim();
-    if (message === "") return;
-
-    // Check if we're editing a message
-    if (editingMessageId) {
-        // Send edit to server
-        const editData = {
-            messageId: editingMessageId,
-            newMessage: message
-        };
-        console.log("Editing message:", editData);
-        socket.emit("edit message", editData);
-        // Removed unused messageData object
-
-        // Reset editing state
-        editingMessageId = null;
-        resetChatForm();
-    } else {
-        // Send new message
-        const messageData = {
-            channelId: currentChannel,
-            username: username,
-            message: message,
-            replyTo: replyingTo || undefined // Include replyTo if set
-        };
-        console.log("Sending message:", messageData);
-        socket.emit("message", messageData);
-    }
-
-    messageInput.value = "";
-    if (replyingTo) {
-        const replyIndicator = document.getElementById('replyIndicator');
-        if (replyIndicator) replyIndicator.style.display = 'none';
-        document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
-        replyingTo = null;
-    }
-}
-
-    // Reset the chat form after editing
-    function resetChatForm() {
-        // Change submit button text back to "Send"
-        const submitButton = document.querySelector("#chatForm button[type='submit']");
-        if (submitButton) {
-            submitButton.textContent = "Send";
-        }
-
-        // Remove cancel button if it exists
-        const cancelButton = document.getElementById("cancelEditBtn");
-        if (cancelButton) {
-            cancelButton.remove();
-        }
-
-        // Remove editing class from form
-        if (chatForm) {
-            chatForm.classList.remove("editing");
-        }
-    }
-
-    // Cancel editing
-    function cancelEdit() {
-        messageInput.value = ""; // Clear input
-        editingMessageId = null; // Reset editing state
-        resetChatForm(); // Reset form UI
-    }
-  
     // Event listeners for sending messages
     if (chatForm) {
         chatForm.addEventListener("submit", sendMessage);
@@ -371,9 +166,84 @@ function sendMessage(e) {
         replyingTo = null; // Clear reply state
     });
 });
-//};
 
 // Helper functions
+
+// Send message functionality
+function sendMessage(e) {
+if (e) e.preventDefault(); // Prevent form submission if event is provided
+
+// Always refresh username from localStorage before sending
+username = localStorage.getItem('username') || 'Anonymous';
+
+const messageInput = document.getElementById("chatInput");
+if (!messageInput || !currentChannel) {
+    console.log("Cannot send message - missing input or channel", {
+        messageInput: !!messageInput,
+        currentChannel
+    });
+    return;
+}
+
+const message = messageInput.value.trim();
+if (message === "") return;
+
+// Check if we're editing a message
+if (editingMessageId) {
+    // Send edit to server
+    const editData = {
+        messageId: editingMessageId,
+        newMessage: message
+    };
+    console.log("Editing message:", editData);
+    socket.emit("edit message", editData);
+    // Removed unused messageData object
+
+    // Reset editing state
+    editingMessageId = null;
+    resetChatForm();
+} else {
+    // Send new message
+    const messageData = {
+        channelId: currentChannel,
+        username: username,
+        message: message,
+        replyTo: replyingTo || undefined // Include replyTo if set
+    };
+    console.log("Sending message:", messageData);
+    if (socket) socket.emit("message", messageData); //if active socket, "if" for tests
+}
+
+messageInput.value = "";
+if (replyingTo) {
+    const replyIndicator = document.getElementById('replyIndicator');
+    if (replyIndicator) replyIndicator.style.display = 'none';
+    document.querySelectorAll('.message').forEach(msg => msg.classList.remove('replying-to'));
+    replyingTo = null;
+}
+}
+
+// Reset the chat form after editing
+function resetChatForm() {
+    // Change submit button text back to "Send"
+    const submitButton = document.querySelector("#chatForm button[type='submit']");
+    if (submitButton) {
+        submitButton.textContent = "Send";
+    }
+
+    // Remove cancel button if it exists
+    const cancelButton = document.getElementById("cancelEditBtn");
+    if (cancelButton) {
+        cancelButton.remove();
+    }
+
+    // Remove editing class from form
+    if (chatForm) {
+        chatForm.classList.remove("editing");
+    }
+}
+
+
 function displayMessage(data) {
     const chatMessages = document.getElementById("chatMessages");
     if (!chatMessages) {
@@ -865,7 +735,10 @@ function showToast(message, channelId, messageId) {
 }
 
 // Display the reminders modal
-document.getElementById('viewRemindersBtn').addEventListener('click', showRemindersModal);
+const viewRemindersBtn = document.getElementById('viewRemindersBtn');
+if (viewRemindersBtn) {
+  viewRemindersBtn.addEventListener('click', showRemindersModal);
+}
 
 function showRemindersModal() {
     fetch('http://localhost:5000/reminders', {
@@ -1106,7 +979,7 @@ function joinChannel(channelId) {
 
     console.log("Joining channel:", channelId);
     currentChannel = channelId;
-    socket.emit("join channel", channelId);
+    if (socket) socket.emit("leave channel", currentChannel);
 
     replyingTo = null;
     document.getElementById('replyIndicator').style.display = 'none';
@@ -1182,7 +1055,7 @@ function closeChat() {
     const startConversationText = document.getElementById("startConversationText");
 
     if (currentChannel) {
-        socket.emit("leave channel", currentChannel);
+        if (socket) socket.emit("leave channel", currentChannel);   //if for testing
         currentChannel = null;
     }
 
@@ -1205,25 +1078,6 @@ function closeChat() {
         btn.classList.remove('active');
     });
 }
-
-function setCurrentChannel(channel) {
-    currentChannel = channel;
-}
-
-function getCurrentChannel() {
-    return currentChannel;
-}
-
-
-// Export functions for testing
-module.exports = {
-    displaySystemMessage,
-    sendMessage,
-    closeChat,
-    joinChannel,
-    setCurrentChannel,
-    getCurrentChannel
-};
 
 // Helper function for emoji insertion - will be used by emoji.js
 function insertTextAtCursor(input, text) {
@@ -1248,3 +1102,20 @@ window.closeChat = closeChat;
 window.sendMessage = sendMessage; // Export for use in standalone buttons
 window.insertTextAtCursor = insertTextAtCursor; // Export for use with emoji picker
 window.cancelEdit = cancelEdit; // Export cancel edit function
+
+function setCurrentChannel(channel) {
+    currentChannel = channel;
+}
+
+function getCurrentChannel() {
+    return currentChannel;
+}
+// Export functions for testing
+module.exports = {
+    displaySystemMessage,
+    sendMessage,
+    closeChat,
+    joinChannel,
+    setCurrentChannel,
+    getCurrentChannel
+};
