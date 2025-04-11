@@ -13,7 +13,22 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"No tests specified\" && exit 0",
+    "test": "jest",
     "build": "echo \"No build process specified\""
+  },
+    "jest": {
+      "projects": [
+        {
+          "displayName": "backend test",
+          "testEnvironment": "node",
+          "testMatch": ["**/server.test.js"]
+        },
+        {
+          "displayName": "frontend tests",
+          "testEnvironment": "jsdom",
+          "testMatch": ["**/public/**/*.test.js"]
+        }
+      ]
+    }
   }
 }

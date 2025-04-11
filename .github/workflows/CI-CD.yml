@@ -9,11 +9,11 @@ on:
       - main
 
 jobs:
-  build:
+  backend-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Code b
         uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -24,21 +24,35 @@ jobs:
       - name: Install Dependencies
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm install
-
-      - name: Run Tests
+      
+      - name: Run Backend Tests
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm test
+        
+  frontend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code f
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: Gladiators_SOEN341_Project_W25
+        run: npm install
 
       - name: Build Project
         working-directory: Gladiators_SOEN341_Project_W25
         run: npm run build
 
   deploy:
-    needs: build
+    needs: [backend-test, frontend-tests]
     runs-on: ubuntu-latest
 
     steps:
       - name: Deploy to Production
-        run: |
-          echo "Deploying to production..."
-          # Add deployment commands here, e.g., SSH, S3, Firebase, Vercel, etc.
+        run: echo "Deploying to production..."

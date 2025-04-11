@@ -821,12 +821,20 @@ app.post("/register", async (req, res) => {
     }
 
     try {
+        // Check if the username already exists
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).json({ error: "Username already exists!" });
+        }
+
+        // If the username doesn't exist, hash the password and create a new user
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
         const newUser = new User({ username, password: hashedPassword, role });
         await newUser.save();
         res.json({ message: "User registered successfully!" });
     } catch (err) {
-        res.status(400).json({ error: "Username already exists!" });
+        // Catch any other errors and send a generic error response
+        res.status(500).json({ error: "Server error. Please try again." });
     }
 });
 
@@ -1402,10 +1410,8 @@ async function initializeDefaultChannels() {
 
 // Start the Server
 const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, () => {
+const running = server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-
     // Initialize default channels when server starts
     initializeDefaultChannels();
 
@@ -1437,3 +1443,5 @@ server.listen(PORT, () => {
         }
     }, 60000); // Every minute
 });
+
+module.exports = { app, running }; //export for testing
