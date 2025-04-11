@@ -2,8 +2,8 @@
 let socket;
 let currentChannel = null;
 
-let username = localStorage.getItem('username') || 'Anonymous';
-let userRole = localStorage.getItem('userRole') || 'user';
+let username = typeof localStorage !== 'undefined' ? localStorage.getItem('username') || 'Anonymous' : 'Anonymous'; //allow for testing
+let userRole = typeof localStorage !== 'undefined' ? localStorage.getItem('userRole') || 'user' : 'user';
 let editingMessageId = null; // Track which message is being edited
 let replyingTo = null;
 
@@ -1205,6 +1205,16 @@ function closeChat() {
         btn.classList.remove('active');
     });
 }
+
+function setCurrentChannel(channel) {
+    currentChannel = channel;
+}
+
+function getCurrentChannel() {
+    return currentChannel;
+}
+
+
 // Export functions for testing
 module.exports = {
     displaySystemMessage,
