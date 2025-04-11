@@ -65,6 +65,126 @@ body {
     color: #333;
 }
 
+/* Reply Area */
+.reply-indicator {
+    background-color: #e0e0e0; /* Slightly darker gray for better visibility */
+    border-radius: 8px; /* Softer, modern rounded corners */
+    padding: 10px 15px; /* More horizontal padding for breathing room */
+    margin-bottom: 10px; /* Consistent spacing below */
+    display: flex; /* Flexbox for flexible layout */
+    justify-content: space-between; /* Space out icon, text, and button */
+    align-items: center; /* Center contents vertically */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Enhanced shadow for a floating effect */
+    opacity: 0; /* Hidden by default for animation */
+    transform: translateY(-10px); /* Start above for slide-in */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth animation */
+}
+
+.reply-icon {
+    font-size: 14px; /* Subtle size for the icon */
+    color: #666; /* Muted gray to complement the design */
+    margin-right: 5px; /* Space between icon and text */
+}
+
+.reply-indicator span#replyText {
+    font-size: 15px; /* Slightly larger for readability */
+    color: #222; /* Darker text for contrast */
+    font-weight: 500; /* Medium weight for a modern touch */
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide excess text */
+    text-overflow: ellipsis; /* Ellipsis for long text */
+    flex: 1; /* Fill available space */
+}
+
+.reply-indicator button {
+    background: none; /* Minimalist button */
+    border: none; /* No border */
+    font-size: 18px; /* Larger cancel icon */
+    cursor: pointer; /* Indicate clickability */
+    color: #e70000; /* Light gray for subtlety */
+    position: relative; /* For hover effect positioning */
+    padding: 5px; /* Larger clickable area */
+}
+
+.reply-indicator button::before {
+    content: ''; /* Pseudo-element for hover background */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px; /* Circular hover area */
+    height: 24px;
+    border-radius: 50%; /* Rounded shape */
+    background-color: transparent; /* Invisible by default */
+    transition: background-color 0.2s ease; /* Smooth hover transition */
+}
+
+.reply-indicator button:hover::before {
+    background-color: rgba(0, 0, 0, 0.1); /* Subtle gray background on hover */
+}
+
+.reply-indicator button:hover {
+    color: #555; /* Darker gray on hover for feedback */
+}
+
+.reply-button {
+    margin-top: 8px;
+    background-color: #333333;
+    border: none; /* Removes default border for a flat look */
+    border-radius: 8px;
+    color: #fff;
+    width: 80px;
+    align-items: center;
+    padding: 4px 16px; /* Larger padding for better clickability */
+    font-size: 12px; /* Slightly bigger text for readability */
+    font-weight: 500; /* Medium weight for modern typography */
+    cursor: pointer; /* Shows it’s clickable */
+    transition: background-color 0.2s ease, transform 0.1s ease; /* Smooth effects */
+}
+
+.reply-button:hover {
+    background-color: #444444; /* Lightens on hover */
+}
+
+.reply-button:active {
+    transform: scale(0.98); /* Slight shrink on click */
+    background-color: #222222; /* Darkens when pressed */
+}
+
+.reply-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); /* Focus ring for accessibility */
+}
+
+.replied-message {
+    background-color: #f0f0f0;          /* Light gray background for subtle contrast */
+    color: #666;                        /* Muted text color to indicate it's a reference */
+    border-left: 4px solid #007bff;     /* Blue left border to visually cue a quote */
+    padding: 10px;                      /* Internal spacing for readability */
+    margin-bottom: 10px;                /* Space below to separate from the main message */
+    font-size: 0.9em;                   /* Slightly smaller text to differentiate it */
+    border-radius: 4px;                 /* Rounded corners for a modern feel */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    cursor: pointer;                    /* Hand cursor to suggest interactivity */
+    width: 100%;                        /* Full width of the parent container */
+    white-space: nowrap;                /* Prevents text wrapping */
+    overflow: hidden;                   /* Hides excess text */
+    text-overflow: ellipsis;            /* Adds "..." for truncated text */
+    transition: background-color 0.2s ease; /* Smooth hover transition */
+}
+
+.replied-message:hover {
+    background-color: #e8e8e8;          /* Lighter background on hover for feedback */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+    .reply-indicator {
+        padding: 8px; /* Reduced padding on mobile */
+        font-size: 12px; /* Smaller text */
+    }
+}
+
 /* Message styling for different users */
 .message {
     max-width: 70%;
@@ -223,6 +343,259 @@ body {
     display: block;
 }
 
+/*-------------------Start of Reminders--------------------*/
+
+.delete-option {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.reminder-modal, .reminders-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.reminder-modal .modal-content, .reminders-modal {
+    background: linear-gradient(135deg, #ffffff, #f9f9f9); /* Subtle gradient */
+    padding: 25px;
+    border-radius: 10px;
+    width: 350px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+    text-align: center;
+}
+
+.reminders-modal .modal-content {
+    background: #fff;
+    border-radius: 10px;
+    width: 450px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    background-color: #f9f9f9; /* Light gray header background */
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.modal-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+}
+
+.modal-header .close-btn:hover {
+    color: #333;
+}
+
+.reminders-body {
+    padding: 15px 20px;
+    overflow-y: auto; /* Scrollable content */
+}
+
+.reminder-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reminders-modal h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 600;
+}
+
+.no-reminders {
+    color: #666;
+    text-align: center;
+    padding: 10px;
+}
+
+.reminders-list {
+    list-style: none;
+    padding: 0;
+}
+
+.reminder-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.reminder-details {
+    flex: 1;
+}
+
+.reminder-channel {
+    display: block;
+    color: #888;
+    font-size: 0.9em;
+}
+
+.reminder-message {
+    flex: 1;
+    font-size: 14px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reminder-time {
+    color: #888;
+    font-size: 12px;
+    margin-right: 15px;
+    min-width: 60px;
+    text-align: right;
+}
+
+.view-reminders-btn {
+    background-color: #4a90e2; /* Modern blue */
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.view-reminders-btn:hover {
+    background-color: #357abd;
+    transform: scale(1.05); /* Slight scale-up effect */
+}
+
+.set-reminder-option {
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color:#357abd;
+}
+
+.set-reminder-option:hover {
+    background-color: #ddd; /* Hover background */
+    color: #333;
+}
+
+.cancel-reminder-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #e74c3c;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    line-height: 1;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.cancel-reminder-btn:hover {
+    color: #c0392b;
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+.reminder-modal button {
+    display: block;
+    margin: 10px 0;
+    padding: 5px;
+    width: 100%;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.modal-content button {
+    padding: 12px;
+    background-color: #4a90e2; /* Modern blue */
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modal-content button:hover {
+    background-color: #357abd;
+}
+
+.custom-time {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom-time input[type="datetime-local"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+.custom-time button {
+    background-color: #28a745; /* Blue for custom option */
+}
+
+.custom-time button:hover {
+    background-color: #218838;
+}
+
+.close-btn {
+    margin-top: 20px;
+    background-color: #e74c3c; /* Red for close */
+    padding: 10px;
+    width: 100%;
+}
+
+.close-btn:hover {
+    background-color: #c0392b;
+}
+
 .delete-option {
     padding: 8px 12px;
     cursor: pointer;
@@ -232,6 +605,8 @@ body {
 .delete-option:hover {
     background-color: #f8f8f8;
 }
+
+/*-------------------End of Reminders--------------------*/
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -486,4 +861,388 @@ body.dark-theme .delete-option:hover {
     font-size: 0.7rem;
     line-height: 18px;
     margin-left: 6px;
+}
+
+/* Emoji button styles */
+.emoji-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 5px;
+    padding: 0 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.emoji-button:hover {
+    background-color: rgba(67, 97, 238, 0.1);
+}
+
+body.dark-theme .emoji-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Emoji picker container */
+.emoji-picker {
+    display: none;
+    position: absolute;
+    bottom: 70px;
+    left: 10px;
+    z-index: 1000;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.emoji-picker.visible {
+    display: block;
+}
+
+body.dark-theme .emoji-picker {
+    background-color: #2a3441;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Overrides for emoji-mart in dark mode */
+body.dark-theme em-emoji-picker {
+    --background: #2a3441;
+    --border-color: #374151;
+    --category-emoji-padding: 0.5rem;
+    --category-emoji-size: 1.25rem;
+    --category-font-color: #f3f4f6;
+    --category-font-weight: bold;
+    --input-background: #111827;
+    --input-border-color: #374151;
+    --input-font-color: #f3f4f6;
+    --input-placeholder-color: #d1d5db;
+    --secondary-background: #1f2937;
+    --text-color: #f3f4f6;
+}
+
+/* Edit option in dropdown menu */
+.edit-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #4361ee;
+}
+
+.edit-option:hover {
+    background-color: #f8f8f8;
+}
+
+body.dark-theme .edit-option {
+    color: #738aec;
+}
+
+body.dark-theme .edit-option:hover {
+    background-color: #374151;
+}
+
+/* Cancel edit button */
+.cancel-edit-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    margin-right: 10px;
+}
+
+.cancel-edit-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Edited indicator */
+.edited-indicator {
+    font-size: 0.8em;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* Change submit button color when editing */
+#chatForm.editing button[type="submit"] {
+    background-color: #28a745;
+}
+
+#chatForm.editing button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+/* View history option in dropdown menu */
+.history-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #17a2b8;
+}
+
+.history-option:hover {
+    background-color: #f8f8f8;
+}
+
+body.dark-theme .history-option {
+    color: #5bc0de;
+}
+
+body.dark-theme .history-option:hover {
+    background-color: #374151;
+}
+
+/* History modal */
+.history-modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.history-modal-content {
+    background-color: white;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #4361ee;
+    color: white;
+}
+
+.history-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.history-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.history-modal-body {
+    padding: 15px;
+    overflow-y: auto;
+    max-height: calc(90vh - 60px);
+}
+
+.history-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.history-item.current {
+    background-color: #f8f9fa;
+    border-color: #4361ee;
+}
+
+.history-item-header {
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-timestamp {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.history-item-text {
+    word-break: break-word;
+}
+
+.no-history-message {
+    text-align: center;
+    color: #6c757d;
+    padding: 10px;
+    font-style: italic;
+}
+
+/* Dark theme styles for history modal */
+body.dark-theme .history-modal-content {
+    background-color: #1f2937;
+    color: #f3f4f6;
+}
+
+body.dark-theme .history-modal-header {
+    background-color: #2a3441;
+}
+
+body.dark-theme .history-item {
+    border-color: #374151;
+    background-color: #111827;
+}
+
+body.dark-theme .history-item.current {
+    background-color: #1f2937;
+    border-color: #4361ee;
+}
+
+body.dark-theme .history-timestamp {
+    color: #d1d5db;
+}
+
+body.dark-theme .no-history-message {
+    color: #d1d5db;
+}
+
+
+
+
+/* Make sure chat header has the right style */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #6b7dff;
+    color: white;
+}
+
+.chat-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: white;
+}
+
+.chat-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.view-requests-btn {
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.leave-channel-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.leave-channel-btn:hover {
+    background-color: #c82333;
+}
+
+/* Styling for the requests panel */
+.requests-panel {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 60px;
+    width: 280px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.requests-panel-header {
+    padding: 12px 16px;
+    background-color: #6b7dff;
+    color: white;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.requests-panel-header .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.requests-panel-content {
+    padding: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.no-requests-message {
+    text-align: center;
+    padding: 12px;
+    color: #777;
+    font-style: italic;
+}
+
+.join-request-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.join-request-item:last-child {
+    border-bottom: none;
+}
+
+.request-username {
+    font-weight: 500;
+}
+
+.request-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.accept-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
 }

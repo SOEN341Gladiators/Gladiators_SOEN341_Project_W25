@@ -8,139 +8,9 @@
     <link rel="stylesheet" href="style_ChatPage.css">
     <link rel="stylesheet" href="nav_bar.css">
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        /* Make sure chat header has the right style */
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            background-color: #6b7dff;
-            color: white;
-        }
-
-        .chat-header h2 {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 500;
-            color: white;
-        }
-
-        .chat-header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .view-requests-btn {
-            background-color: transparent;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .leave-channel-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .leave-channel-btn:hover {
-            background-color: #c82333;
-        }
-
-        /* Styling for the requests panel */
-        .requests-panel {
-            display: none;
-            position: absolute;
-            top: 60px;
-            right: 60px;
-            width: 280px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        .requests-panel-header {
-            padding: 12px 16px;
-            background-color: #6b7dff;
-            color: white;
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-        }
-
-        .requests-panel-header .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .requests-panel-content {
-            padding: 16px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .no-requests-message {
-            text-align: center;
-            padding: 12px;
-            color: #777;
-            font-style: italic;
-        }
-
-        .join-request-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .join-request-item:last-child {
-            border-bottom: none;
-        }
-
-        .request-username {
-            font-weight: 500;
-        }
-
-        .request-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .accept-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-
-        .reject-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-    </style>
+    <!-- Add emoji-mart libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@emoji-mart/data"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@5.5.2/dist/browser.js"></script>
 </head>
 
 <body>
@@ -199,18 +69,23 @@
             <span class="theme-toggle-text">Toggle theme</span>
         </button>
         <p class="welcome-text" id="welcomeText">Welcome to ChatHaven!</p>
-        <p class="start-conversation-text" id="startConversationText">Select a channel or friend to start chatting.</p>
 
         <div class="chat-area" id="chatArea" style="display: none;">
             <div class="chat-header">
                 <h2 id="chatTitle">Channel/Recipient Name</h2>
                 <div class="chat-header-actions">
                     <button class="view-requests-btn" id="viewRequestsBtn">View Requests</button>
+                    <button class="view-reminders-btn" id="viewRemindersBtn">My Reminders</button>
                     <button class="leave-channel-btn" id="leaveChannelBtn">Leave Channel</button>
                 </div>
             </div>
             <div class="chat-messages" id="chatMessages"></div>
+            <div class="reply-indicator" id="replyIndicator" style="display: none;">
+                <button id="cancelReply" title="Cancel reply">x</button>
+                <span id="replyText"></span>
+            </div>
             <form id="chatForm" class="chat-form">
+                <button type="button" id="emojiButton" class="emoji-button">😊</button>
                 <input type="text" id="chatInput" placeholder="Type your message here...">
                 <button type="submit">Send</button>
             </form>
@@ -227,6 +102,10 @@
         </div>
     </div>
 
+    <!-- Emoji picker container -->
+    <div id="emojiPicker" class="emoji-picker">
+        <!-- The emoji picker will be populated by the API -->
+    </div>
 
     <!-- Include the Socket.IO messaging and nav bar scripts -->
     <script src="messaging.js"></script>
@@ -234,6 +113,7 @@
     <script src="leave_channel.js"></script>
     <script src="nav_bar.js"></script>
     <script src="registered_users.js"></script> <!-- Include to maintain socket -->
+    <script src="emoji.js"></script> <!-- Add emoji functionality -->
 
     <script>
         // Function to redirect to the appropriate create channel page

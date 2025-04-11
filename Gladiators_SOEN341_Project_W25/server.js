@@ -82,10 +82,27 @@ const messageSchema = new mongoose.Schema({
     username: { type: String, required: true },
     message: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    isDeleted: { type: Boolean, default: false } // isDeleted field for message deletion
+    isDeleted: { type: Boolean, default: false },
+    isEdited: { type: Boolean, default: false },
+    editHistory: [{
+        previousMessage: { type: String },
+        editedAt: { type: Date, default: Date.now }
+    }],
+    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null } // New field for reply
 });
 
 const Message = mongoose.model('Message', messageSchema);
+
+// Reminder Schema
+const reminderSchema = new mongoose.Schema({
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    messageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: true },
+    channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', required: true },
+    reminderTime: { type: Date, required: true },
+    status: { type: String, enum: ['pending', 'sent', 'canceled'], default: 'pending' }
+});
+
+const Reminder = mongoose.model('Reminder', reminderSchema);
 
 // Store connected users and their roles
 const connectedUsers = new Map();
@@ -126,6 +143,7 @@ io.on('connection', (socket) => {
                 console.log('Emitting userList on user info:', users.length, 'users');
                 io.emit('userList', users);
                 console.log('Successfully emitted userList on user info:', users.length, 'users');
+                socket.join(user._id.toString());
             } catch (error) {
                 console.error('Error in user info:', error);
                 socket.emit('error', 'Failed to update user status');
@@ -162,6 +180,7 @@ io.on('connection', (socket) => {
             const messages = await Message.find({ channelId })
                 .sort({ timestamp: -1 })
                 .limit(50)
+                .populate('replyTo', '_id username message timestamp') // Populate replyTo details
                 .lean();
 
             // Send message history to the user
@@ -175,10 +194,22 @@ io.on('connection', (socket) => {
     // Handle new messages
     socket.on('message', async (data) => {
         try {
-            const { channelId, username, message } = data;
+            const { channelId, username, message, replyTo } = data;
 
             // Log incoming message data
             console.log('Received message:', data);
+
+            // If replyTo is provided, validate it exists in the same channel
+            let replyToData = null;
+            if (replyTo) {
+                replyToData = await Message.findOne({ _id: replyTo, channelId })
+                    .select('username message timestamp isDeleted')
+                    .lean();
+                if (!replyToData) {
+                    socket.emit('error', 'Original message not found or not in this channel');
+                    return;
+                }
+            }
 
             // Save message to database
             const newMessage = new Message({
@@ -186,7 +217,8 @@ io.on('connection', (socket) => {
                 username,
                 message,
                 timestamp: new Date(),
-                isDeleted: false // Initialize as not deleted
+                isDeleted: false, // Initialize as not deleted
+                replyTo: replyTo || null // Include replyTo if provided
             });
             await newMessage.save();
 
@@ -196,7 +228,8 @@ io.on('connection', (socket) => {
                 username,
                 message,
                 timestamp: newMessage.timestamp,
-                isDeleted: false
+                isDeleted: false,
+                replyTo: replyToData// Include replyTo in the broadcast
             });
 
             // Log successful broadcast
@@ -301,6 +334,66 @@ io.on('connection', (socket) => {
             }
         }
     }, 5 * 60 * 1000);
+
+    // Handle message editing
+    socket.on('edit message', async (data) => {
+        try {
+            const { messageId, newMessage } = data;
+            if (!messageId || !newMessage) {
+                socket.emit('error', 'Message ID and new message content are required');
+                return;
+            }
+
+            // Check if the user is the message author
+            const message = await Message.findById(messageId);
+            if (!message) {
+                socket.emit('error', 'Message not found');
+                return;
+            }
+
+            const userInfo = connectedUsers.get(socket.id);
+            if (!userInfo) {
+                socket.emit('error', 'User info not found');
+                return;
+            }
+
+            // Only allow message authors to edit their messages
+            if (message.username !== userInfo.username) {
+                socket.emit('error', 'You can only edit your own messages');
+                return;
+            }
+
+            // Store the previous message in history
+            const historyEntry = {
+                previousMessage: message.message,
+                editedAt: new Date()
+            };
+
+            // Update the message in the database
+            const updatedMessage = await Message.findByIdAndUpdate(
+                messageId,
+                {
+                    message: newMessage,
+                    isEdited: true,
+                    $push: { editHistory: historyEntry }
+                },
+                { new: true }
+            );
+
+            // Broadcast the edit to all users in the channel
+            io.to(message.channelId.toString()).emit('message edited', {
+                messageId: updatedMessage._id,
+                newMessage: updatedMessage.message,
+                isEdited: true,
+                editHistory: updatedMessage.editHistory
+            });
+
+            console.log('Message edited successfully:', messageId);
+        } catch (error) {
+            console.error('Error editing message:', error);
+            socket.emit('error', 'Failed to edit message');
+        }
+    });
 
     socket.on('disconnect', () => {
         clearTimeout(awayTimeout);
@@ -602,6 +695,7 @@ app.get('/messages/:channelId', authenticate, async (req, res) => {
         const messages = await Message.find({ channelId: req.params.channelId })
             .sort({ timestamp: -1 })
             .limit(50)
+            .populate('replyTo', '_id username message timestamp') // Populate replyTo details
             .lean();
         res.json(messages.reverse());
     } catch (error) {
@@ -680,6 +774,38 @@ app.get("/all-channels-with-status", authenticate, async (req, res) => {
     } catch (error) {
         console.error("Error fetching all channels with status:", error);
         res.status(500).json({ error: "Failed to fetch channels" });
+    }
+});
+
+// Message History
+app.get('/message/history/:messageId', authenticate, async (req, res) => {
+    try {
+        const { messageId } = req.params;
+        const message = await Message.findById(messageId).lean();
+
+        if (!message) {
+            return res.status(404).json({ error: 'Message not found' });
+        }
+
+        res.json({
+            message: message.message,
+            editHistory: message.editHistory || []
+        });
+    } catch (error) {
+        console.error('Error fetching message history:', error);
+        res.status(500).json({ error: 'Failed to fetch message history' });
+    }
+});
+
+app.get('/reminders', authenticate, async (req, res) => {
+    try {
+        const reminders = await Reminder.find({ userId: req.user.id, status: 'pending' })
+            .populate('messageId', 'username message')
+            .populate('channelId', 'name');
+        res.json(reminders);
+    } catch (error) {
+        console.error('Error fetching reminders:', error);
+        res.status(500).json({ error: 'Failed to fetch reminders' });
     }
 });
 
@@ -1199,6 +1325,46 @@ app.post("/channel/leave/:channelId", authenticate, async (req, res) => {
     }
 });
 
+app.post('/reminder', authenticate, async (req, res) => {
+    const { messageId, channelId, reminderTime } = req.body;
+    if (!messageId || !channelId || !reminderTime) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        const reminder = new Reminder({
+            userId: req.user.id,
+            messageId,
+            channelId,
+            reminderTime: new Date(reminderTime),
+            status: 'pending'
+        });
+        await reminder.save();
+        res.status(201).json({ message: 'Reminder set successfully' });
+    } catch (error) {
+        console.error('Error setting reminder:', error);
+        res.status(500).json({ error: 'Failed to set reminder' });
+    }
+});
+
+//******************************DELETE Methods************************************//
+
+app.delete('/reminder/:id', authenticate, async (req, res) => {
+    try {
+        const reminder = await Reminder.findOneAndUpdate(
+            { _id: req.params.id, userId: req.user.id, status: 'pending' },
+            { status: 'canceled' },
+            { new: true }
+        );
+        if (!reminder) {
+            return res.status(404).json({ error: 'Reminder not found or already processed' });
+        }
+        res.json({ message: 'Reminder canceled successfully' });
+    } catch (error) {
+        console.error('Error canceling reminder:', error);
+        res.status(500).json({ error: 'Failed to cancel reminder' });
+    }
+});
+
 // Catch-all 404 route handler - place at the end
 app.use((req, res) => {
     res.status(404).json({ error: "Route not found" }); // Error 404 Page
@@ -1248,6 +1414,34 @@ const running = server.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     // Initialize default channels when server starts
     initializeDefaultChannels();
+
+    // Start reminder checking
+    setInterval(async () => {
+        try {
+            const now = new Date();
+            console.log("Checking reminders at:", now);
+            const dueReminders = await Reminder.find({
+                reminderTime: { $lte: now },
+                status: 'pending'
+            }).populate('messageId', 'username message');
+            console.log("Found due reminders:", dueReminders.length, dueReminders);
+            for (const reminder of dueReminders) {
+                const userId = reminder.userId.toString();
+                const message = reminder.messageId;
+                const reminderData = {
+                    message: `Reminder: ${message.username} said "${message.message}"`,
+                    channelId: reminder.channelId,
+                    messageId: reminder.messageId
+                };
+                console.log("Emitting 'reminder' to user:", userId, "with data:", reminderData);
+                io.to(userId).emit('reminder', reminderData);
+                await Reminder.updateOne({ _id: reminder._id }, { status: 'sent' });
+                console.log("Updated reminder to 'sent':", reminder._id);
+            }
+        } catch (error) {
+            console.error('Error processing reminders:', error);
+        }
+    }, 60000); // Every minute
 });
 
 module.exports = { app, running }; //export for testing
