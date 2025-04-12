@@ -156,10 +156,118 @@ describe('Messaging Tests', () => {
 
   //not implimented yet
   test('Edit Messages properly updates the message', () => {
-    // Set up a spy on console.log to check if an error message is logged
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    //--------------------------------------  
-    consoleSpy.mockRestore();
+    /// Set up a DOM structure for the test
+  document.body.innerHTML = `
+  <div id="chatForm">
+    <button type="submit">Send</button>
+  </div>
+  <input id="chatInput" />
+  <div id="chatMessages">
+    <div id="message-123" class="message" data-original-message="Original test message">
+      <p>Original test message</p>
+    </div>
+  </div>
+`;
+
+// Mock the global editingMessageId variable
+global.editingMessageId = null;
+
+// Call the function to test
+editMessage('123');
+
+// Check if input field was updated with the original message
+const chatInput = document.getElementById('chatInput');
+expect(chatInput.value).toBe('Original test message');
+
+// Check if form entered editing mode
+const chatForm = document.getElementById('chatForm');
+expect(chatForm.classList.contains('editing')).toBe(true);
+
+// Check if submit button text was changed
+const submitButton = chatForm.querySelector("button[type='submit']");
+expect(submitButton.textContent).toBe('Save');
+
+// Check if cancel button was added
+const cancelButton = document.getElementById('cancelEditBtn');
+expect(cancelButton).not.toBeNull();
+expect(cancelButton.textContent).toBe('Cancel');
+
+// Check if the editing state was updated
+expect(messagingModule.getEditingMessageId()).toBe('123');
   });
 
+  test('displayMessageHistory displays current and past message versions', () => {
+    // Set up a sample message history
+    const messageId = '123';
+    const data = {
+      message: 'This is the current message',
+      editHistory: [
+        { previousMessage: 'This is edit 1', editedAt: '2025-04-10T10:00:00Z' },
+        { previousMessage: 'This is the original message', editedAt: '2025-04-09T10:00:00Z' }
+      ]
+    };
+  
+    // Call the function
+    messagingModule.displayMessageHistory(messageId, data);
+  
+    // Check that the modal was created
+    const modal = document.getElementById('historyModal');
+    expect(modal).not.toBeNull();
+  
+    // Check current version text
+    const currentText = modal.querySelector('.history-item.current .history-item-text');
+    expect(currentText.textContent).toBe('This is the current message');
+  
+    // Check previous versions
+    const historyItems = modal.querySelectorAll('.history-item:not(.current)');
+    expect(historyItems.length).toBe(2);
+  
+    expect(historyItems[1].textContent).toContain('This is edit 1');
+    expect(historyItems[0].textContent).toContain('This is the original message');
+  
+    // Clean up the modal after test
+    modal.remove();
+  });
+  
+  test('showRemindersModal displays reminders in modal', (done) => {
+    const mockReminders = [
+      {
+        _id: 'abc123',
+        reminderTime: '2025-04-11T15:30:00Z',
+        messageId: {
+          username: 'testUser',
+          message: 'Don\'t forget this!'
+        }
+      }
+    ];
+  
+    // Mock localStorage
+    localStorage.getItem = jest.fn((key) => {
+      if (key === 'token') return 'mocked-token';
+      return null;
+    });
+  
+    // Mock fetch
+    global.fetch = jest.fn(() =>
+      Promise.resolve({
+        json: () => Promise.resolve(mockReminders)
+      })
+    );
+  
+    // Call the function
+    messagingModule.showRemindersModal();
+  
+    // Wait briefly for modal to render
+    setTimeout(() => {
+      const modal = document.querySelector('.reminders-modal');
+      expect(modal).not.toBeNull();
+  
+      const reminderItem = modal.querySelector('.reminder-item');
+      expect(reminderItem).not.toBeNull();
+      expect(reminderItem.textContent).toContain("testUser: Don't forget this!");
+  
+      done();
+    }, 0); // 0ms still lets microtasks resolve after the promise
+  });
+  
 });

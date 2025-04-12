@@ -1104,6 +1104,10 @@ window.closeChat = closeChat;
 window.sendMessage = sendMessage; // Export for use in standalone buttons
 window.insertTextAtCursor = insertTextAtCursor; // Export for use with emoji picker
 window.cancelEdit = cancelEdit; // Export cancel edit function
+window.editMessage = editMessage;
+window.displayMessageHistory = displayMessageHistory;
+window.deleteMessage = deleteMessage;
+window.showRemindersModal = showRemindersModal;
 
 function setCurrentChannel(channel) {
     currentChannel = channel;
@@ -1112,6 +1116,11 @@ function setCurrentChannel(channel) {
 function getCurrentChannel() {
     return currentChannel;
 }
+
+function getEditingMessageId() {
+    return editingMessageId;
+}
+
 // Export functions for testing
 module.exports = {
     displaySystemMessage,
@@ -1119,5 +1128,11 @@ module.exports = {
     closeChat,
     joinChannel,
     setCurrentChannel,
-    getCurrentChannel
+    getCurrentChannel,
+    getEditingMessageId,
+    editMessage,
+    displayMessageHistory,
+    deleteMessage,
+    showRemindersModal
 };
+
