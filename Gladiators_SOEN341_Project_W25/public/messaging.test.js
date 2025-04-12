@@ -18,6 +18,8 @@ describe('Messaging Tests', () => {
       <div id="chatArea"></div>
       <div id="welcomeText"></div>
       <div id="startConversationText"></div>
+      <button id="viewRemindersBtn"></button>
+      <div id="replyIndicator" style="display: none;"></div>
     `;
     
     // Mock localStorage
@@ -150,4 +152,14 @@ describe('Messaging Tests', () => {
     // Restore the console log spy
     consoleSpy.mockRestore();
   });
+
+
+  //not implimented yet
+  test('Edit Messages properly updates the message', () => {
+    // Set up a spy on console.log to check if an error message is logged
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    //--------------------------------------  
+    consoleSpy.mockRestore();
+  });
+
 });
