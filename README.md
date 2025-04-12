@@ -27,10 +27,6 @@ The goal is to create a versatile communication platform, dubbed "ChatHaven", in
 | Malik Mburu| 40235260 | Frontend |
 | Zakaria El fettahi| 40236677 | Frontend |
 
-# Coding standards
-1. Choose meaningful names that convey the purpose of the variable or function.
-2 .Add meaningful Comments and Prioritize Documentation
-3. Divide code into smaller, self-contained modules or functions for reusability and maintainability especially if it has tests.
-4. Do not use/update different versions gloabaly 
+ 
 
 
