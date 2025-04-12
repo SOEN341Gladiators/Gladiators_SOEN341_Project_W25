@@ -1,4 +1,9 @@
 // nav_bar.js - with private channel support and invitation system
+
+// Extract DM user from the URL if present
+const urlParams = new URLSearchParams(window.location.search);
+const dmUser = urlParams.get('dm');
+
 document.addEventListener('DOMContentLoaded', function () {
     // Initialize UI elements
     const sidebar = document.getElementById('sidebar');

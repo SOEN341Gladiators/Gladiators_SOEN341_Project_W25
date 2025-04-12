@@ -1,3 +1,5 @@
+/* global io */
+
 // Initialize global variables
 let socket;
 let currentChannel = null;

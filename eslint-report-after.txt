@@ -1,0 +1,50 @@
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/channel_requests.js
+  116:15  error  'data' is defined but never used  no-unused-vars
+  145:15  error  'data' is defined but never used  no-unused-vars
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/messaging.test.js
+  35:5  error  'username' is not defined   no-undef
+  96:5  error  'closeChat' is not defined  no-undef
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/nav_bar.js
+  184:23  error  'userId' is assigned a value but never used          no-unused-vars
+  796:15  error  'selectedDmUser' is assigned a value but never used  no-unused-vars
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/private_channel_handler.js
+  6:11  error  'userId' is assigned a value but never used  no-unused-vars
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/registered_users.js
+  5:37  error  'io' is not defined  no-undef
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/server.js
+  542:14  error  'err' is defined but never used    no-unused-vars
+  552:14  error  'err' is defined but never used    no-unused-vars
+  607:14  error  'error' is defined but never used  no-unused-vars
+  709:14  error  'err' is defined but never used    no-unused-vars
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/server.test.js
+  11:1  error  'beforeAll' is not defined  no-undef
+  24:1  error  'afterAll' is not defined   no-undef
+  43:1  error  'describe' is not defined   no-undef
+  44:5  error  'it' is not defined         no-undef
+  49:9  error  'expect' is not defined     no-undef
+  50:9  error  'expect' is not defined     no-undef
+  53:5  error  'it' is not defined         no-undef
+  58:9  error  'expect' is not defined     no-undef
+  59:9  error  'expect' is not defined     no-undef
+  62:5  error  'it' is not defined         no-undef
+  67:9  error  'expect' is not defined     no-undef
+  68:9  error  'expect' is not defined     no-undef
+  71:5  error  'it' is not defined         no-undef
+  76:9  error  'expect' is not defined     no-undef
+  77:9  error  'expect' is not defined     no-undef
+
+/Users/zakariaelfettahi/Desktop/Gladiators_SOEN341_Project_W25/server.js
+  205:14  error  'err' is defined but never used  no-unused-vars
+  220:14  error  'err' is defined but never used  no-unused-vars
+  230:14  error  'err' is defined but never used  no-unused-vars
+  252:14  error  'err' is defined but never used  no-unused-vars
+
+✖ 31 problems (31 errors, 0 warnings)
+

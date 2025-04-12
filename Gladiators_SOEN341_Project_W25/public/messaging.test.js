@@ -1,3 +1,5 @@
+/* global describe, test, beforeEach, afterEach, expect, jest */
+
 /**
  * @jest-environment jsdom
  */

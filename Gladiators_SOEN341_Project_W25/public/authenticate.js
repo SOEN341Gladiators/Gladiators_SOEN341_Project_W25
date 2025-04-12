@@ -39,3 +39,7 @@ function handleLogin({ token, username, role, userId }) {
         window.location.href = "member.html";
     }
 }
+
+// Make functions available globally
+window.logout = logout;
+window.handleLogin = handleLogin;
