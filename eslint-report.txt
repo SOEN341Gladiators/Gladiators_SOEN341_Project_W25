@@ -1,0 +1,91 @@
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/authenticate.js
+  22:10  error  'logout' is defined but never used       no-unused-vars
+  31:10  error  'handleLogin' is defined but never used  no-unused-vars
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/channel_requests.js
+  116:15  error  'data' is defined but never used  no-unused-vars
+  145:15  error  'data' is defined but never used  no-unused-vars
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/messaging.js
+   94:10  error  'generateDMChannelId' is defined but never used  no-unused-vars
+  140:14  error  'io' is not defined                              no-undef
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/messaging.test.js
+    8:1   error  'describe' is not defined    no-undef
+   10:3   error  'beforeEach' is not defined  no-undef
+   23:16  error  'jest' is not defined        no-undef
+   28:16  error  'jest' is not defined        no-undef
+   29:19  error  'jest' is not defined        no-undef
+   33:5   error  'username' is not defined    no-undef
+   37:3   error  'afterEach' is not defined   no-undef
+   41:3   error  'test' is not defined        no-undef
+   47:5   error  'expect' is not defined      no-undef
+   48:5   error  'expect' is not defined      no-undef
+   51:3   error  'test' is not defined        no-undef
+   53:24  error  'jest' is not defined        no-undef
+   63:5   error  'expect' is not defined      no-undef
+   70:5   error  'expect' is not defined      no-undef
+   76:3   error  'test' is not defined        no-undef
+   78:24  error  'jest' is not defined        no-undef
+   87:5   error  'expect' is not defined      no-undef
+   93:3   error  'test' is not defined        no-undef
+   94:5   error  'closeChat' is not defined   no-undef
+  100:9   error  'expect' is not defined      no-undef
+  101:9   error  'expect' is not defined      no-undef
+  102:9   error  'expect' is not defined      no-undef
+  103:9   error  'expect' is not defined      no-undef
+  106:3   error  'test' is not defined        no-undef
+  108:24  error  'jest' is not defined        no-undef
+  116:5   error  'expect' is not defined      no-undef
+  117:5   error  'expect' is not defined      no-undef
+  122:3   error  'test' is not defined        no-undef
+  124:24  error  'jest' is not defined        no-undef
+  132:5   error  'expect' is not defined      no-undef
+  138:3   error  'test' is not defined        no-undef
+  140:24  error  'jest' is not defined        no-undef
+  146:5   error  'expect' is not defined      no-undef
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/nav_bar.js
+  179:23  error  'userId' is assigned a value but never used          no-unused-vars
+  791:15  error  'selectedDmUser' is assigned a value but never used  no-unused-vars
+  807:76  error  'dmUser' is not defined                              no-undef
+  814:35  error  'dmUser' is not defined                              no-undef
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/private_channel_handler.js
+  6:11  error  'userId' is assigned a value but never used  no-unused-vars
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/public/registered_users.js
+  5:37  error  'io' is not defined  no-undef
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/server.js
+  542:14  error  'err' is defined but never used    no-unused-vars
+  552:14  error  'err' is defined but never used    no-unused-vars
+  607:14  error  'error' is defined but never used  no-unused-vars
+  709:14  error  'err' is defined but never used    no-unused-vars
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/Gladiators_SOEN341_Project_W25/server.test.js
+  11:1  error  'beforeAll' is not defined  no-undef
+  24:1  error  'afterAll' is not defined   no-undef
+  43:1  error  'describe' is not defined   no-undef
+  44:5  error  'it' is not defined         no-undef
+  49:9  error  'expect' is not defined     no-undef
+  50:9  error  'expect' is not defined     no-undef
+  53:5  error  'it' is not defined         no-undef
+  58:9  error  'expect' is not defined     no-undef
+  59:9  error  'expect' is not defined     no-undef
+  62:5  error  'it' is not defined         no-undef
+  67:9  error  'expect' is not defined     no-undef
+  68:9  error  'expect' is not defined     no-undef
+  71:5  error  'it' is not defined         no-undef
+  76:9  error  'expect' is not defined     no-undef
+  77:9  error  'expect' is not defined     no-undef
+
+/Users/zakariaelfettahi/Gladiators_SOEN341_Project_W25/server.js
+  205:14  error  'err' is defined but never used  no-unused-vars
+  220:14  error  'err' is defined but never used  no-unused-vars
+  230:14  error  'err' is defined but never used  no-unused-vars
+  252:14  error  'err' is defined but never used  no-unused-vars
+
+✖ 68 problems (68 errors, 0 warnings)
+
